@@ -4,85 +4,141 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* =========================================================
+   SPACE SHARE ADMIN — DESIGN TOKENS (ALIGNED TO FIGMA)
+   Brand:     #6200EE  (oklch 0.4969 0.2816 293.01)
+   Brand 50:  #EDE9FE  (light bg / disabled state)
+   Radius:    12px base input/card, full for CTAs
+   Spacing:   4px grid → section=40/48px, form-gap=20px, input-h=48px
+   Type:      Geist Sans (next/font/google) · 400/500/600/700
+   ========================================================= */
+
 @theme inline {
+  /* ---- Colors ---- */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Brand scale */
+  --color-brand-50:  #EDE9FE;
+  --color-brand-100: #DDD6FE;
+  --color-brand-200: #C4B5FD;
+  --color-brand-300: #A78BFA;
+  --color-brand-400: #8B5CF6;
+  --color-brand-500: #6200EE;   /* ← PRIMARY BRAND */
+  --color-brand-600: #5400D0;   /* ← HOVER STATE    */
+  --color-brand-700: #4500A8;
+  --color-brand-800: #380089;
+  --color-brand-900: #2A0066;
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Sidebar */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* ---- Fonts ---- */
+  --font-sans: var(--font-geist-sans);   /* ← FIX: map to correct next/font variable */
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-geist-sans);
+
+  /* ---- Radii ---- */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius: 12px;                  /* base = input/card radius (Figma) */
+  --radius-xl: 16px;
+  --radius-2xl: 20px;              /* decorative cards (activity/booking) */
+  --radius-3xl: 28px;
+  --radius-4xl: 40px;              /* auth panel edge radius */
+
+  /* ---- Semantic spacing (Figma-aligned) ---- */
+  --spacing-section: 40px;          /* page / panel padding → p-10 */
+  --spacing-section-xl: 48px;       /* xl screens → xl:p-12   */
+  --spacing-form-gap: 20px;         /* space-y form rows → space-y-5 */
+  --spacing-card-pad: 16px;         /* standard card inner → p-4 */
+  --spacing-card-gap: 10px;         /* gap inside card rows → gap-2.5 */
+  --spacing-input-h: 48px;          /* h-12 inputs/cta buttons */
+  --spacing-label-gap: 8px;         /* space between label & input → space-y-2 */
+  --spacing-panel-pad-sm: 24px;     /* mobile form wrapper → p-6 */
+  --spacing-panel-pad-lg: 48px;     /* desktop form wrapper → lg:p-12 */
 }
 
+/* =========================================================
+   LIGHT MODE TOKENS (PRIMARY / RING BRANDED TO #6200EE)
+   ========================================================= */
 :root {
   --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --foreground: oklch(0.145 0 0);          /* #111827 near-black body */
+
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
+
+  /* PRIMARY = SPACE SHARE PURPLE #6200EE */
+  --primary: oklch(0.4969 0.2816 293.01);       /* #6200EE */
+  --primary-foreground: oklch(1 0 0);           /* white */
+
+  --secondary: oklch(0.969 0.003 286.5);        /* brand-50 soft bg */
   --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
+  --muted: oklch(0.970 0 0);                    /* F7F7F8 */
+  --muted-foreground: oklch(0.556 0 0);         /* #6B7280 */
+  --accent: oklch(0.969 0.003 286.5);
   --accent-foreground: oklch(0.205 0 0);
+
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
+  --destructive-foreground: oklch(1 0 0);
+
+  --border: oklch(0.922 0 0);                   /* #E5E7EB */
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
+  --ring: oklch(0.4969 0.2816 293.01);          /* focus ring = brand purple */
+
+  --chart-1: oklch(0.4969 0.2816 293.01);       /* brand */
+  --chart-2: oklch(0.6231 0.188 259.81);        /* blue */
+  --chart-3: oklch(0.55 0.2 165);               /* teal */
+  --chart-4: oklch(0.75 0.18 60);               /* amber */
+  --chart-5: oklch(0.6 0.22 25);                /* orange */
+
+  --sidebar: oklch(0.985 0 0);                  /* FAFAFA */
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-primary: oklch(0.4969 0.2816 293.01);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.969 0.003 286.5);
+  --sidebar-accent-foreground: oklch(0.145 0 0);
   --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-ring: oklch(0.4969 0.2816 293.01);
 }
 
+/* =========================================================
+   DARK MODE TOKENS
+   ========================================================= */
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -90,7 +146,7 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
+  --primary: oklch(0.7721 0.1715 293.01);
   --primary-foreground: oklch(0.205 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
@@ -99,14 +155,15 @@
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(1 0 0);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --ring: oklch(0.7721 0.1715 293.01);
+  --chart-1: oklch(0.7721 0.1715 293.01);
+  --chart-2: oklch(0.66 0.17 259.81);
+  --chart-3: oklch(0.58 0.17 165);
+  --chart-4: oklch(0.76 0.17 60);
+  --chart-5: oklch(0.63 0.18 25);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
@@ -117,14 +174,29 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* =========================================================
+   BASE LAYER
+   ========================================================= */
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
-  }
   html {
     @apply font-sans;
+    font-feature-settings: "cv11", "ss01", "ss03";  /* Geist character set polish */
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    /* Default body: 14px / 1.5 (Figma dashboard body copy) */
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  h1, h2, h3, h4 {
+    letter-spacing: -0.01em;   /* Figma headings have tight tracking */
+  }
+  /* Figma paragraph captions → 12px (NOT 10px). Replace text-[10px] usage in components */
+  .text-caption {
+    font-size: 12px;
+    line-height: 1.5;
   }
 }
