@@ -30,6 +30,124 @@ import {
 } from "@/components/ui/table";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { LoadingState } from "@/components/shared/LoadingState";
+import { ErrorState } from "@/components/shared/ErrorState";
+
+export interface DataTablePaginationProps {
+  pageIndex: number;
+  pageSize: number;
+  totalCount: number;
+  onPaginationChange: (pagination: PaginationState) => void;
+  pageSizes?: number[];
+}
+
+export function DataTablePagination({
+  pageIndex,
+  pageSize,
+  totalCount,
+  onPaginationChange,
+  pageSizes = [10, 20, 50, 100],
+}: DataTablePaginationProps) {
+  const pageCount = Math.max(1, Math.ceil(totalCount / (pageSize || 1)));
+  const canPreviousPage = pageIndex > 0;
+  const canNextPage = pageIndex < pageCount - 1;
+
+  const firstVisible = totalCount === 0 ? 0 : pageIndex * pageSize + 1;
+  const lastVisible = Math.min((pageIndex + 1) * pageSize, totalCount);
+
+  return (
+    <div className="mt-5 flex flex-col-reverse md:flex-row md:items-center md:justify-between gap-4">
+      <div className="text-xs text-muted-foreground">
+        Showing{" "}
+        <span className="font-semibold text-foreground">{firstVisible}</span>
+        {" – "}
+        <span className="font-semibold text-foreground">{lastVisible}</span>
+        {" of "}
+        <span className="font-semibold text-foreground">{totalCount}</span>
+      </div>
+
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+        <div className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+          <span>Rows</span>
+          <select
+            className="h-8 rounded-lg border border-border bg-background px-2.5 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+            value={pageSize}
+            onChange={(e) =>
+              onPaginationChange({
+                pageIndex: 0,
+                pageSize: Number(e.target.value),
+              })
+            }
+          >
+            {pageSizes.map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="inline-flex items-center gap-1">
+          <Button
+            variant="outline"
+            size="icon-sm"
+            onClick={() => onPaginationChange({ pageIndex: 0, pageSize })}
+            disabled={!canPreviousPage}
+            className="h-8 w-8 rounded-lg border-border"
+            aria-label="First page"
+          >
+            <ChevronsLeft size={14} />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon-sm"
+            onClick={() =>
+              onPaginationChange({ pageIndex: Math.max(0, pageIndex - 1), pageSize })
+            }
+            disabled={!canPreviousPage}
+            className="h-8 w-8 rounded-lg border-border"
+            aria-label="Previous page"
+          >
+            <ChevronLeft size={14} />
+          </Button>
+          <div className="px-2 min-w-[70px] text-center text-xs font-medium text-foreground">
+            Page{" "}
+            <span className="text-primary">{pageIndex + 1}</span> / {pageCount}
+          </div>
+          <Button
+            variant="outline"
+            size="icon-sm"
+            onClick={() =>
+              onPaginationChange({
+                pageIndex: Math.min(pageCount - 1, pageIndex + 1),
+                pageSize,
+              })
+            }
+            disabled={!canNextPage}
+            className="h-8 w-8 rounded-lg border-border"
+            aria-label="Next page"
+          >
+            <ChevronRight size={14} />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon-sm"
+            onClick={() =>
+              onPaginationChange({
+                pageIndex: Math.max(0, pageCount - 1),
+                pageSize,
+              })
+            }
+            disabled={!canNextPage}
+            className="h-8 w-8 rounded-lg border-border"
+            aria-label="Last page"
+          >
+            <ChevronsRight size={14} />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -229,105 +347,13 @@ export function DataTable<TData, TValue>({
       </div>
 
       {!isEmpty ? (
-        <div className="mt-5 flex flex-col-reverse md:flex-row md:items-center md:justify-between gap-4">
-          <div className="text-xs text-muted-foreground">
-            Showing{" "}
-            <span className="font-semibold text-foreground">
-              {resolvedPagination.pageIndex * resolvedPagination.pageSize + 1}
-            </span>
-            {" – "}
-            <span className="font-semibold text-foreground">
-              {Math.min(
-                (resolvedPagination.pageIndex + 1) *
-                  resolvedPagination.pageSize,
-                totalCount
-              )}
-            </span>
-            {" of "}
-            <span className="font-semibold text-foreground">
-              {totalCount}
-            </span>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
-            <div className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-              <span>Rows</span>
-              <select
-                className="h-8 rounded-lg border border-border bg-background px-2.5 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
-                value={resolvedPagination.pageSize}
-                onChange={(e) =>
-                  setResolvedPagination({
-                    pageIndex: 0,
-                    pageSize: Number(e.target.value),
-                  })
-                }
-              >
-                {pageSizes.map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="inline-flex items-center gap-1">
-              <Button
-                variant="outline"
-                size="icon-sm"
-                onClick={() =>
-                  setResolvedPagination((p) => ({ ...p, pageIndex: 0 }))
-                }
-                disabled={!table.getCanPreviousPage()}
-                className="h-8 w-8 rounded-lg border-border"
-                aria-label="First page"
-              >
-                <ChevronsLeft size={14} />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon-sm"
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
-                className="h-8 w-8 rounded-lg border-border"
-                aria-label="Previous page"
-              >
-                <ChevronLeft size={14} />
-              </Button>
-              <div className="px-2 min-w-[70px] text-center text-xs font-medium text-foreground">
-                Page{" "}
-                <span className="text-primary">
-                  {resolvedPagination.pageIndex + 1}
-                </span>{" "}
-                / {Math.max(1, table.getPageCount())}
-              </div>
-              <Button
-                variant="outline"
-                size="icon-sm"
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
-                className="h-8 w-8 rounded-lg border-border"
-                aria-label="Next page"
-              >
-                <ChevronRight size={14} />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon-sm"
-                onClick={() =>
-                  setResolvedPagination((p) => ({
-                    ...p,
-                    pageIndex: Math.max(0, table.getPageCount() - 1),
-                  }))
-                }
-                disabled={!table.getCanNextPage()}
-                className="h-8 w-8 rounded-lg border-border"
-                aria-label="Last page"
-              >
-                <ChevronsRight size={14} />
-              </Button>
-            </div>
-          </div>
-        </div>
+        <DataTablePagination
+          pageIndex={resolvedPagination.pageIndex}
+          pageSize={resolvedPagination.pageSize}
+          totalCount={totalCount}
+          onPaginationChange={setResolvedPagination}
+          pageSizes={pageSizes}
+        />
       ) : null}
     </div>
   );

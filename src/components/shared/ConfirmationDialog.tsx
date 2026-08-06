@@ -109,7 +109,7 @@ export function ConfirmationDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className={cn("rounded-2xl p-0 overflow-hidden", SIZE_CLASS[size])}
+        className={cn("rounded-2xl p-3 overflow-hidden", SIZE_CLASS[size])}
       >
         <DialogHeader className="p-6 pb-0">
           <div className="flex items-start gap-4">

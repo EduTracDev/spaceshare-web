@@ -17,7 +17,7 @@ export function Sidebar() {
   return (
     <aside
       data-slot="sidebar"
-      className="hidden md:flex md:flex-col w-60 lg:w-64 shrink-0 h-screen sticky top-0 bg-sidebar border-r border-sidebar-border"
+      className="hidden md:flex md:flex-col w-60 lg:w-64 shrink-0 h-screen sticky top-0 bg-white border-r border-sidebar-border"
     >
       {/* Logo + Admin label */}
       <div className="px-5 pt-6 pb-5 space-y-2">

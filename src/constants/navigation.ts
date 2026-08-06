@@ -26,8 +26,8 @@ export const SIDEBAR_NAV_ITEMS: NavItem[] = [
   { label: "Bookings",         href: "/bookings",    icon: CalendarDays },
   { label: "Transactions",     href: "/transactions",icon: CreditCard },
   { label: "Disputes",         href: "/disputes",    icon: ShieldAlert },
-  { label: "Reported Reviews", href: "/reviews",     icon: MessageSquareWarning },
-  { label: "Audit Log",        href: "/audit",       icon: ClipboardList },
+  { label: "Reported Reviews", href: "/reported-reviews",     icon: MessageSquareWarning },
+  { label: "Audit Log",        href: "/audit-log",       icon: ClipboardList },
   { label: "Settings",         href: "/settings",    icon: Settings },
 ];
 
