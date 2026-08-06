@@ -95,7 +95,7 @@ export function UserDetailsSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-[460px] p-0 rounded-l-3xl overflow-hidden flex flex-col">
+      <SheetContent className="sm:max-w-[460px] min-h-full p-0 rounded-l-3xl overflow-hidden flex flex-col">
         <div className="flex flex-col h-full">
           <SheetHeader className="p-6 pb-4 border-b border-border/60">
             <div className="flex items-start gap-4">
