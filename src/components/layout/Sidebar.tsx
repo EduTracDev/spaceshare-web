@@ -20,7 +20,7 @@ export function Sidebar() {
       className="hidden md:flex md:flex-col w-60 lg:w-64 shrink-0 h-screen sticky top-0 bg-white border-r border-sidebar-border"
     >
       {/* Logo + Admin label */}
-      <div className="px-5 pt-6 pb-5 space-y-2">
+      <div className="h-20 px-5 pt-6 pb-5 flex flex-col justify-center space-y-2 border-b border-sidebar-border">
         <Link href="/dashboard" className="flex items-center gap-2 shrink-0">
           <span className="font-bold text-[15px] text-primary tracking-tight">
             SpaceShare

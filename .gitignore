@@ -42,7 +42,6 @@ yarn-error.log*
 next-env.d.ts
 
 /prod-specs
-src/mocks
 AGENTS.md
 note.txt
 CLAUDE.md

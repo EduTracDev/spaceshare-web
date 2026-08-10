@@ -77,7 +77,7 @@ export default function BookingsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
+      <PageHeader bleed
         title="Bookings"
         subtitle="All bookings across the marketplace."
         actions={

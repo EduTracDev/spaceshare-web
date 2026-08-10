@@ -11,7 +11,7 @@ import { CommissionSettingsCard } from "@/features/settings/components/Commissio
 export default function SettingsPage() {
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
+      <PageHeader bleed
         title="Settings"
         subtitle="Manage your account and platform commission."
         actions={

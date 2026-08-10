@@ -1,5 +1,4 @@
-import * as React from "react";
-import { UsersRound, Home, UserCheck, Building2 } from "lucide-react";
+import { UsersRound, UserRoundPlus, UserStar, Building2 } from "lucide-react";
 import { StatsCard } from "@/components/shared/StatsCard";
 import type { DashboardSummary } from "@/features/dashboard/types/dashboard.types";
 
@@ -19,13 +18,13 @@ export function StatsGrid({ data, className }: StatsGridProps) {
     {
       title: "Total Hosts",
       value: data.totalHosts.value.toLocaleString("en-US"),
-      icon: Home,
+      icon: UserRoundPlus,
       trend: data.totalHosts,
     },
     {
       title: "Total Guests",
       value: data.totalGuests.value.toLocaleString("en-US"),
-      icon: UserCheck,
+      icon: UserStar,
       trend: data.totalGuests,
     },
     {
@@ -35,7 +34,7 @@ export function StatsGrid({ data, className }: StatsGridProps) {
       trend: data.activeListings,
     },
   ];
-console.log("data:",data);
+
   return (
     <div
       data-slot="stats-grid"
@@ -44,9 +43,10 @@ console.log("data:",data);
         className
       )}
     >
-      {cards.map((c) => (
+      {cards.map((c, i) => (
         <StatsCard
           key={c.title}
+          index={i}
           title={c.title}
           value={c.value}
           icon={c.icon}

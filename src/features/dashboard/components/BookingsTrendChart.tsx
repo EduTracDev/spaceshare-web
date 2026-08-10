@@ -107,7 +107,7 @@ export function BookingsTrendChart({
                   }
                 />
                 <Tooltip
-                  cursor={{ fill: "hsl(var(--primary) / 0.04)" }}
+                  cursor={{ fill: "#ad72b985" }}  //controls the bar fill on tooltip activated
                   contentStyle={{
                     borderRadius: 12,
                     border: "1px solid hsl(var(--border))",
@@ -115,10 +115,11 @@ export function BookingsTrendChart({
                       "0 10px 30px -10px rgba(15, 23, 42, 0.15)",
                     fontSize: 12,
                   }}
-                  formatter={(value: number) => [
-                    `Bookings: ${Number(value).toLocaleString()}`,
-                  ]}
-                  labelFormatter={(label: string) => `${label} 15`}
+                  formatter={(value) => {
+                    const num = typeof value === "number" ? value : Number(value ?? 0);
+                    return [`Bookings: ${num.toLocaleString()}`, "Bookings"] as const;
+                  }}
+                  labelFormatter={(label) => `${String(label ?? "")} 15`}
                 />
 
                 <Bar dataKey="bookings" radius={[6, 6, 0, 0]}>

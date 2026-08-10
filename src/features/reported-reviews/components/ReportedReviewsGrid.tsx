@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import type { PaginationState } from "@tanstack/react-table";
 import { Filter, Search, X } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -27,6 +27,8 @@ import type {
 } from "@/features/reported-reviews/types/reported-review.types";
 import { reportedReviewService } from "@/services/reported-review.service";
 import { cn } from "@/lib/utils";
+import { PaginatedReportedReviews } from "@/features/reported-reviews/types/reported-review.types";
+
 
 interface ReportedReviewsGridProps {
   onRetain: (review: ReportedReview) => void;
@@ -58,7 +60,7 @@ export function ReportedReviewsGrid({
     pageSize: 6,
   });
 
-  const query = useQuery({
+  const query = useQuery<PaginatedReportedReviews, Error>({
     queryKey: [
       "reportedReviews",
       search,
@@ -73,7 +75,7 @@ export function ReportedReviewsGrid({
         page: pagination.pageIndex + 1,
         pageSize: pagination.pageSize,
       }),
-    keepPreviousData: true,
+    placeholderData: keepPreviousData
   });
 
   const { items, total } = query.data ?? { items: [], total: 0 };

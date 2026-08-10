@@ -85,21 +85,65 @@ export function EmptyState({
       )}
     >
       {showIconBg ? (
-        <div className="relative mb-5">
+        <div className="relative mb-8 mt-2">
           {/* Purple circular icon wrapper */}
-          <div className="relative h-20 w-20 rounded-full bg-brand-200/70 flex items-center justify-center">
-            <div className="absolute inset-2 rounded-full bg-primary/20" />
-            <div className="relative h-12 w-12 rounded-full bg-primary/30 text-primary flex items-center justify-center">
-              <Icon size={22} strokeWidth={2} />
-            </div>
-            {/* Magnifying glass badge overlap */}
-            {variant !== "default" ? (
-              <div className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-brand-100 text-primary flex items-center justify-center ring-4 ring-white">
-                <Search size={14} strokeWidth={2.2} />
-              </div>
-            ) : null}
-            <Sparkles />
-          </div>
+          <svg
+            width="150"
+            height="115"
+            viewBox="0 0 240 180"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            {/* Background blobs */}
+            <ellipse
+              cx="80"
+              cy="105"
+              rx="55"
+              ry="35"
+              fill="#F5F3FA"
+            />
+
+            <ellipse
+              cx="165"
+              cy="120"
+              rx="55"
+              ry="35"
+              fill="#F5F3FA"
+            />
+
+            {/* Main circle */}
+            <circle
+              cx="120"
+              cy="90"
+              r="56"
+              fill="#C5A5FA"
+            />
+
+            {/* Magnifying glass handle */}
+            <path
+              d="M160 130L185 155"
+              stroke="#B28AF7"
+              strokeWidth="10"
+              strokeLinecap="round"
+            />
+
+            {/* Pulse line */}
+            <path
+              d="M82 91H105L114 77L128 108L140 91H158"
+              stroke="white"
+              strokeWidth="7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+
+            {/* Decorative dots */}
+            <circle cx="65" cy="45" r="5" fill="#D9DDE5" />
+            <circle cx="55" cy="125" r="6" fill="#B58AF7" />
+            <circle cx="190" cy="50" r="7" fill="#B58AF7" />
+            <circle cx="210" cy="105" r="4" fill="#D9DDE5" />
+            <circle cx="115" cy="155" r="6" fill="#B58AF7" />
+            <circle cx="205" cy="75" r="3" fill="#B58AF7" />
+          </svg>
         </div>
       ) : (
         <div className="h-16 w-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-5">

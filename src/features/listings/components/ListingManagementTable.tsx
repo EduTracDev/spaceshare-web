@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import type {
   ColumnDef,
   PaginationState,
@@ -27,6 +27,8 @@ import type {
   ListingStatusFilter,
 } from "@/features/listings/types/listing.types";
 import { listingService } from "@/services/listing.service";
+import { PaginatedListings } from "@/features/listings/types/listing.types";
+
 
 interface ListingManagementTableProps {
   onViewDetails: (listing: Listing) => void;
@@ -58,7 +60,7 @@ export function ListingManagementTable({
     [onViewDetails]
   );
 
-  const query = useQuery({
+  const query = useQuery<PaginatedListings, Error>({
     queryKey: [
       "listings",
       search,
@@ -82,7 +84,7 @@ export function ListingManagementTable({
           | undefined,
         sortOrder: sorting[0]?.desc ? "desc" : "asc",
       }),
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
   });
 
   return (

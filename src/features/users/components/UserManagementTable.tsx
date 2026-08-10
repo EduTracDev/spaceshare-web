@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import type {
   SortingState,
   PaginationState,
@@ -11,13 +11,6 @@ import { Filter, ArrowUpDown } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -36,6 +29,8 @@ import type {
   UserRoleTab,
 } from "@/features/users/types/user.types";
 import { userService } from "@/services/user.service";
+import { PaginatedUsers } from "@/features/users/types/user.types";
+
 
 interface UserManagementTableProps {
   onInviteAdminClick: () => void;
@@ -82,7 +77,7 @@ export function UserManagementTable({
     [onViewDetails, onSuspend, onReactivate]
   );
 
-  const query = useQuery({
+  const query = useQuery<PaginatedUsers, Error>({
     queryKey: [
       "users",
       role,
@@ -102,7 +97,7 @@ export function UserManagementTable({
         sortBy: sorting[0]?.id,
         sortOrder: sorting[0]?.desc ? "desc" : "asc",
       }),
-    keepPreviousData: true,
+    placeholderData: keepPreviousData
   });
 
   const statusLabel = STATUS_OPTIONS.find((s) => s.value === status)?.label ?? "All";
@@ -111,8 +106,8 @@ export function UserManagementTable({
     <Card className="rounded-2xl border-border/70 bg-card shadow-sm">
       <CardHeader className="flex flex-col gap-5 px-5 pt-5 pb-4 space-y-0">
         {/* Top row: Users heading + Invite button */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <h2 className="text-[17px] font-semibold tracking-tight">Users</h2>
+        <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <h2 className="text-xl font-semibold tracking-tight">Users</h2>
           <Button
             type="button"
             onClick={onInviteAdminClick}
@@ -123,7 +118,7 @@ export function UserManagementTable({
         </div>
 
         {/* Second row: Tabs LEFT + Search + Filter RIGHT */}
-        <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3">
+        <div className="w-full flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3">
           <SegmentedControl
             options={ROLE_TABS}
             value={role}
@@ -195,7 +190,7 @@ export function UserManagementTable({
         </div>
       </CardHeader>
 
-      <CardContent className="px-0 pb-5 pt-0">
+      <CardContent className="px-0 pb-5 pt-0 border">
         <DataTable<AnyUser, unknown>
           columns={columns}
           data={query.data?.items ?? []}

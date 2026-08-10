@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import type { ColumnDef, PaginationState, SortingState } from "@tanstack/react-table";
 import { Filter, Search } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -26,6 +26,8 @@ import type {
   TransactionStatusFilter,
 } from "@/features/transactions/types/transaction.types";
 import { transactionService } from "@/services/transaction.service";
+import { PaginatedTransactions } from "@/features/transactions/types/transaction.types";
+
 
 interface TransactionManagementTableProps {
   onViewDetails: (transaction: Transaction) => void;
@@ -57,7 +59,7 @@ export function TransactionManagementTable({ onViewDetails }: TransactionManagem
     [onViewDetails]
   );
 
-  const query = useQuery({
+  const query = useQuery<PaginatedTransactions, Error>({
     queryKey: [
       "transactions",
       search,
@@ -83,7 +85,7 @@ export function TransactionManagementTable({ onViewDetails }: TransactionManagem
           | undefined,
         sortOrder: sorting[0]?.desc ? "desc" : "asc",
       }),
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
   });
 
   return (

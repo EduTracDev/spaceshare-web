@@ -55,6 +55,7 @@ export default function UsersManagementPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
+        bleed
         title="User Management"
         subtitle="Manage hosts and guests across SpaceShare."
         actions={

@@ -67,7 +67,7 @@ export default function SpaceListingsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
+      <PageHeader bleed
         title="Space Listings"
         subtitle="Review, approve and moderate event spaces."
         actions={

@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 export type TrendTone = "positive" | "negative";
 
 interface StatsCardProps {
+  index: number;
   title: string;
   value: string | number;
   icon: LucideIcon;
@@ -18,6 +19,7 @@ interface StatsCardProps {
 }
 
 export function StatsCard({
+  index,
   title,
   value,
   icon: Icon,
@@ -26,6 +28,7 @@ export function StatsCard({
   className,
 }: StatsCardProps) {
   const positive = trend.tone === "positive";
+
 
   return (
     <Card
@@ -38,14 +41,15 @@ export function StatsCard({
       <CardContent className="p-5 h-full flex flex-col gap-4">
         {/* TOP ROW: icon + trend pill */}
         <div className="flex items-start justify-between">
+          {/* Prompt: The text color should be purple for the first icon, blue for second icon, light blue for third icon, red for the fourth icon.  */}
           <div
             className={cn(
-              "h-9 w-9 rounded-lg flex items-center justify-center shrink-0",
-              positive ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600",
+              "h-9 w-9 rounded-lg flex items-center justify-center shrink-0 font-bold",
+              index===0 ? "text-purple-800" : index===1 ? "text-blue-500" : index===2 ? "text-blue-900" : "text-red-600",
               iconClassName
             )}
           >
-            <Icon size={18} strokeWidth={2.2} />
+            <Icon size={20} strokeWidth={2.2} />
           </div>
           <span
             className={cn(

@@ -33,7 +33,7 @@ export default function DisputesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
+      <PageHeader bleed
         title="Disputes"
         subtitle="Manually review and resolve disputes between guests and hosts."
         actions={

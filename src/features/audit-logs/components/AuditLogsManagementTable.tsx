@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import type {
   ColumnDef,
   PaginationState,
@@ -21,6 +21,7 @@ import { buildAuditLogColumns } from "@/features/audit-logs/table-columns";
 import type {
   AuditLog,
   AuditLogDateRange,
+  PaginatedAuditLogs,
 } from "@/features/audit-logs/types/audit-log.types";
 import { auditLogService } from "@/services/audit-log.service";
 import { cn } from "@/lib/utils";
@@ -124,7 +125,7 @@ export function AuditLogsManagementTable(
     []
   );
 
-  const query = useQuery({
+  const query = useQuery<PaginatedAuditLogs, Error>({
     queryKey: [
       "auditLogs",
       debouncedSearch,
@@ -148,7 +149,7 @@ export function AuditLogsManagementTable(
           | undefined,
         sortOrder: sorting[0]?.desc ? "desc" : "asc",
       }),
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
   });
 
   const activeChip = dateRange.start && dateRange.end;

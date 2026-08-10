@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import type { ColumnDef, PaginationState, SortingState } from "@tanstack/react-table";
 import { Filter, Search, X } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -27,6 +27,8 @@ import type {
 } from "@/features/disputes/types/dispute.types";
 import { disputeService } from "@/services/dispute.service";
 import { cn } from "@/lib/utils";
+import { PaginatedDisputes } from "@/features/disputes/types/dispute.types";
+
 
 interface DisputeManagementTableProps {
   onViewDetails: (dispute: Dispute) => void;
@@ -59,7 +61,7 @@ export function DisputeManagementTable({ onViewDetails }: DisputeManagementTable
     [onViewDetails]
   );
 
-  const query = useQuery({
+  const query = useQuery<PaginatedDisputes, Error>({
     queryKey: [
       "disputes",
       search,
@@ -85,7 +87,7 @@ export function DisputeManagementTable({ onViewDetails }: DisputeManagementTable
           | undefined,
         sortOrder: sorting[0]?.desc ? "desc" : "asc",
       }),
-    keepPreviousData: true,
+    placeholderData: keepPreviousData
   });
 
   const activeFilterLabel = STATUS_OPTIONS.find((option) => option.value === status)?.label;

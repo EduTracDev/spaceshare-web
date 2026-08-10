@@ -29,9 +29,12 @@ export default function DashboardPage() {
   const isError = summaryQ.isError || growthQ.isError || bookingsQ.isError;
   const error = summaryQ.error || growthQ.error || bookingsQ.error || null;
 
+
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Admin Dashboard"
+      <PageHeader
+        bleed
+        title="Admin Dashboard"
         subtitle="Welcome back, Admin - here's what's happening on SpaceShare."
         actions={
           <Button
@@ -66,6 +69,7 @@ export default function DashboardPage() {
         />
       ) : (
         <>
+          {/* Stats Grid */}
           {summaryQ.data ? <StatsGrid data={summaryQ.data} /> : null}
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-5">

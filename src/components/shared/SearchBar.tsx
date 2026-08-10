@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-interface SearchBarProps extends Omit<React.ComponentProps<"input">, "onChange" | "value"> {
+interface SearchBarProps extends Omit<React.ComponentProps<"input">, "onChange" | "size" | "value"> {
   value: string;
   onChange: (value: string) => void;
   debounceMs?: number;

@@ -82,12 +82,12 @@ export function LoadingState({
   return (
     <div
       className={cn(
-        "w-full rounded-2xl border border-border/60 bg-card overflow-hidden",
+        "w-full rounded-2xl px-2 bg-card overflow-hidden",
         className
       )}
     >
       <div
-        className="grid px-5 py-4 border-b border-border/60 bg-muted/30 gap-4"
+        className="grid px-5 py-4 gap-4"
         style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
       >
         {Array.from({ length: columns }).map((_, i) => (

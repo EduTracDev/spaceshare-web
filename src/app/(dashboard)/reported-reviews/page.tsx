@@ -69,7 +69,7 @@ export default function ReportedReviewsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
+      <PageHeader bleed
         title="Reported Reviews"
         subtitle="Review and moderate reported reviews on space."
         actions={

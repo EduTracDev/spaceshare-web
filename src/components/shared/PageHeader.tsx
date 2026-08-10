@@ -10,6 +10,13 @@ interface PageHeaderProps {
   actions?: React.ReactNode;
   backHref?: string;
   backLabel?: string;
+  /**
+   * When true, pulls the header flush with the sidebar + top edge,
+   * negating the horizontal/top padding applied by the outer PageContainer.
+   * The header's own internal text padding remains unchanged.
+   * Use this on every dashboard page inside `(dashboard)`.
+   */
+  bleed?: boolean;
   className?: string;
 }
 
@@ -19,17 +26,28 @@ export function PageHeader({
   actions,
   backHref,
   backLabel = "Back",
+  bleed = false,
   className,
 }: PageHeaderProps) {
   return (
     <div
       data-slot="page-header"
       className={cn(
-        "flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-6 sm:mb-7 border-b border-sidebar",
+        "flex h-20 flex-col gap-4 border-b border-sidebar bg-background py-4 sm:flex-row sm:items-start sm:justify-between",
+        // Internal padding (applied only to text/action insides of header)
+        "px-4 sm:px-6 lg:px-8 xl:px-12",
+        bleed && [
+          // Pull flush with outer PageContainer edges:
+          //   matches PageContainer.tsx line 38: `px-4 sm:px-6 lg:px-8`
+          "-mx-4 sm:-mx-6 lg:-mx-8",
+          // Pull flush with top of main (aligns header top with sidebar logo top):
+          //   matches layout.tsx `paddingY="md"` → `py-6` per PADDING_Y_MAP
+          "",
+        ],
         className
       )}
     >
-      <div className="flex flex-col">
+      <div className="flex flex-col justify-center h-full">
         {backHref ? (
           <Link
             href={backHref}
@@ -50,7 +68,7 @@ export function PageHeader({
       </div>
 
       {actions ? (
-        <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
+        <div className="flex items-center gap-1.5 shrink-0 flex-wrap h-full">
           {actions}
         </div>
       ) : null}

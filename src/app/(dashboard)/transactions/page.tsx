@@ -51,7 +51,7 @@ export default function TransactionsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
+      <PageHeader bleed
         title="Transaction"
         subtitle="Review and release host payouts."
         actions={

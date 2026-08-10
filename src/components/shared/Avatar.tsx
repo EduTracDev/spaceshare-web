@@ -2,9 +2,9 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { getInitials } from "@/utils/formatters";
 import type { StatusKey } from "@/constants/status";
-import { Avatar as AvatarPrimitive, type AvatarProps } from "@/components/ui/avatar";
+import { Avatar as AvatarPrimitive } from "@/components/ui/avatar";
 
-export interface UserAvatarProps extends Omit<AvatarProps, "children"> {
+export interface UserAvatarProps extends Omit<React.ComponentPropsWithoutRef<typeof AvatarPrimitive>, "children" | "size"> {
   name: string;
   imageUrl?: string | null;
   size?: "xs" | "sm" | "md" | "lg" | "xl";
@@ -75,10 +75,11 @@ export function UserAvatar({
             alt={name}
             className="h-full w-full object-cover"
           />
-        ) : null}
+        ) :
         <span aria-hidden className="flex h-full w-full items-center justify-center">
           {initials}
-        </span>
+        </span>}
+
       </AvatarPrimitive>
       {status && statusDotColor ? (
         <span

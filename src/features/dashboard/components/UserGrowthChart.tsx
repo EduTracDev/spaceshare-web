@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import {
   Area,
   AreaChart,
@@ -105,10 +104,10 @@ export function UserGrowthChart({ data, isLoading }: UserGrowthChartProps) {
                       "0 10px 30px -10px rgba(15, 23, 42, 0.15)",
                     fontSize: 12,
                   }}
-                  formatter={(value: number, name: string) => [
-                    `${Number(value).toLocaleString()} Users`,
-                    name,
-                  ]}
+                  formatter={(value, name) => {
+                    const num = typeof value === "number" ? value : Number(value ?? 0);
+                    return [`${num.toLocaleString()} Users`, String(name ?? "")] as const;
+                  }}
                 />
                 <Legend content={() => null} />
                 <Area

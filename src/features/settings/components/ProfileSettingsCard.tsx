@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, type FieldValues } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UserRound } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -22,7 +22,6 @@ import { cn } from "@/lib/utils";
 
 type ProfileFormValues = {
   fullName: string;
-  email: string;
 };
 
 export function ProfileSettingsCard() {
@@ -38,31 +37,18 @@ export function ProfileSettingsCard() {
     handleSubmit,
     reset,
     formState: { isDirty, errors },
-    watch,
   } = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileUpdateSchema.pick({ fullName: true })),
+    resolver: zodResolver(profileUpdateSchema),
     disabled: query.isLoading || query.isError,
-    defaultValues: {
-      fullName: "",
-      email: "",
-    },
-    values: {
-      fullName: query.data?.fullName ?? "",
-      email: query.data?.email ?? "",
-    },
+    defaultValues: { fullName: "" },
+    values: { fullName: query.data?.fullName ?? "" },
   });
 
-  const emailValue = watch("email");
+  const emailValue = query.data?.email ?? "";
 
   React.useEffect(() => {
     if (query.data) {
-      reset(
-        {
-          fullName: query.data.fullName,
-          email: query.data.email,
-        },
-        { keepDefaultValues: true }
-      );
+      reset({ fullName: query.data.fullName }, { keepDefaultValues: true });
     }
   }, [query.data, reset]);
 
@@ -71,7 +57,7 @@ export function ProfileSettingsCard() {
       settingsService.updateProfile(values),
     onSuccess: (result, variables) => {
       toast.success(result.message);
-      reset({ fullName: variables.fullName, email: emailValue });
+      reset({ fullName: variables.fullName });
       queryClient.invalidateQueries({ queryKey: ["settings", "profile"] });
     },
     onError: (error) => {

@@ -36,8 +36,8 @@ export function PageContainer({
       data-slot="page-container"
       className={cn(
         "w-full mx-auto px-4 sm:px-6 lg:px-8",
-        MAX_WIDTH_MAP[maxWidth],
-        PADDING_Y_MAP[paddingY],
+        // MAX_WIDTH_MAP[maxWidth],
+        // PADDING_Y_MAP[paddingY],
         className
       )}
       {...props}

@@ -47,7 +47,7 @@ export function buildUserColumns(actions: UserRowActions): ColumnDef<AnyUser>[] 
             onClick={() => actions.onViewDetails(u)}
             className="group flex items-center gap-3 w-full text-left -my-1 py-1 pr-2 rounded-lg hover:bg-muted/40 transition-colors"
           >
-            <UserAvatar name={u.fullName} imageUrl={u.avatarUrl} size="md" status={u.status === "suspended" ? null : u.status} />
+            {/* <UserAvatar name={u.fullName} imageUrl={u.avatarUrl} size="md" status={u.status === "suspended" ? null : u.status} /> */}
             <div className="flex flex-col min-w-0">
               <span className="text-[13px] font-medium text-foreground truncate group-hover:text-primary transition-colors">
                 {u.fullName}
@@ -120,62 +120,62 @@ export function buildUserColumns(actions: UserRowActions): ColumnDef<AnyUser>[] 
         <StatusBadge status={row.original.status} />
       ),
     },
-    {
-      id: "actions",
-      header: () => <span className="sr-only">Actions</span>,
-      enableSorting: false,
-      size: 60,
-      cell: ({ row }) => {
-        const u = row.original;
-        const canSuspend = u.status === "active" || u.status === "pending";
-        const canReactivate = u.status === "suspended";
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted"
-                  aria-label="User actions"
-                />
-              }
-            >
-              <MoreHorizontal size={16} />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 rounded-2xl p-1.5 mt-1">
-              <DropdownMenuGroup>
-                <DropdownMenuItem
-                  className={cn("h-9 gap-2.5 rounded-lg px-2.5 cursor-pointer")}
-                  onClick={() => actions.onViewDetails(u)}
-                >
-                  <span>👁️</span>
-                  <span className="text-[13px]">View details</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="my-1" />
-                {canSuspend ? (
-                  <DropdownMenuItem
-                    className="h-9 gap-2.5 rounded-lg px-2.5 cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-50"
-                    onClick={() => actions.onSuspend(u)}
-                  >
-                    <span>🚫</span>
-                    <span className="text-[13px]">Suspend</span>
-                  </DropdownMenuItem>
-                ) : null}
-                {canReactivate ? (
-                  <DropdownMenuItem
-                    className="h-9 gap-2.5 rounded-lg px-2.5 cursor-pointer text-green-700 focus:text-green-800 focus:bg-green-50"
-                    onClick={() => actions.onReactivate(u)}
-                  >
-                    <span>✅</span>
-                    <span className="text-[13px]">Reactivate</span>
-                  </DropdownMenuItem>
-                ) : null}
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
-      },
-    },
+    // {
+    //   id: "actions",
+    //   header: () => <span className="sr-only">Actions</span>,
+    //   enableSorting: false,
+    //   size: 60,
+    //   cell: ({ row }) => {
+    //     const u = row.original;
+    //     const canSuspend = u.status === "active" || u.status === "pending";
+    //     const canReactivate = u.status === "suspended";
+    //     return (
+    //       <DropdownMenu>
+    //         <DropdownMenuTrigger
+    //           render={
+    //             <Button
+    //               variant="ghost"
+    //               size="icon-xs"
+    //               className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted"
+    //               aria-label="User actions"
+    //             />
+    //           }
+    //         >
+    //           <MoreHorizontal size={16} />
+    //         </DropdownMenuTrigger>
+    //         <DropdownMenuContent align="end" className="w-48 rounded-2xl p-1.5 mt-1">
+    //           <DropdownMenuGroup>
+    //             <DropdownMenuItem
+    //               className={cn("h-9 gap-2.5 rounded-lg px-2.5 cursor-pointer")}
+    //               onClick={() => actions.onViewDetails(u)}
+    //             >
+    //               <span>👁️</span>
+    //               <span className="text-[13px]">View details</span>
+    //             </DropdownMenuItem>
+    //             <DropdownMenuSeparator className="my-1" />
+    //             {canSuspend ? (
+    //               <DropdownMenuItem
+    //                 className="h-9 gap-2.5 rounded-lg px-2.5 cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-50"
+    //                 onClick={() => actions.onSuspend(u)}
+    //               >
+    //                 <span>🚫</span>
+    //                 <span className="text-[13px]">Suspend</span>
+    //               </DropdownMenuItem>
+    //             ) : null}
+    //             {canReactivate ? (
+    //               <DropdownMenuItem
+    //                 className="h-9 gap-2.5 rounded-lg px-2.5 cursor-pointer text-green-700 focus:text-green-800 focus:bg-green-50"
+    //                 onClick={() => actions.onReactivate(u)}
+    //               >
+    //                 <span>✅</span>
+    //                 <span className="text-[13px]">Reactivate</span>
+    //               </DropdownMenuItem>
+    //             ) : null}
+    //           </DropdownMenuGroup>
+    //         </DropdownMenuContent>
+    //       </DropdownMenu>
+    //     );
+    //   },
+    // },
   ];
 }
