@@ -33,7 +33,7 @@ export function PageHeader({
     <div
       data-slot="page-header"
       className={cn(
-        "flex h-20 flex-col gap-4 border-b border-sidebar bg-background py-4 sm:flex-row sm:items-start sm:justify-between",
+        "sticky top-0 left-0 right-0 flex h-20 flex-col gap-4 border-b border-sidebar bg-background py-8 lg:py-4 sm:flex-row sm:items-start sm:justify-between z-30",
         // Internal padding (applied only to text/action insides of header)
         "px-4 sm:px-6 lg:px-8 xl:px-12",
         bleed && [
@@ -57,7 +57,7 @@ export function PageHeader({
             {backLabel}
           </Link>
         ) : null}
-        <h1 className="text-[22px] font-bold text-foreground tracking-tight leading-tight">
+        <h1 className="text-[22px] font-bold text-foreground text-center md:text-left tracking-tight leading-tight">
           {title}
         </h1>
         {subtitle ? (

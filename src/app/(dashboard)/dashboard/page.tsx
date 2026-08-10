@@ -41,7 +41,7 @@ export default function DashboardPage() {
             variant="ghost"
             size="icon-sm"
             aria-label="Notifications"
-            className="relative h-9 w-9 rounded-full border border-border bg-background text-muted-foreground hover:text-foreground"
+            className="hidden md:relative h-9 w-9 rounded-full border border-border bg-background text-muted-foreground hover:text-foreground"
           >
             <Bell size={17} />
           </Button>
