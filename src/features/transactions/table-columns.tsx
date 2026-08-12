@@ -28,13 +28,9 @@ export function buildTransactionColumns(
       header: "#ID",
       enableSorting: true,
       cell: ({ row }) => (
-        <button
-          type="button"
-          onClick={() => actions.onViewDetails(row.original)}
-          className="text-[12.5px] font-semibold text-foreground/90 hover:text-primary"
-        >
+        <span className="text-[12.5px] font-semibold text-foreground/90">
           {row.original.bookingNumber}
-        </button>
+        </span>
       ),
     },
     {

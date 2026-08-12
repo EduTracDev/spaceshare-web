@@ -9,6 +9,7 @@ import {
   Copy,
   Receipt,
   UserRound,
+  Wallet,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -129,69 +130,70 @@ export function TransactionDetailsSheet({
       <SheetContent
         showCloseButton={false}
         side="right"
-        className="sm:max-w-[560px] min-h-full overflow-hidden rounded-l-3xl p-0 border-l"
+        className="!max-w-[92vw] md:!max-w-[80vw] lg:!max-w-[40vw] min-h-full overflow-hidden rounded-l-lg md:rounded-l-3xl p-0 border-l outline-none focus:outline-none focus-visible:outline-none ring-0"
       >
-        <div className="flex h-full flex-col">
-          <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-3">
-            <div>
-              <div className="flex flex-wrap items-center gap-2 text-[13px] text-muted-foreground">
-                <span className="font-semibold text-foreground">{transaction.host.fullName}</span>
-                <span>•</span>
-                <span>{transaction.spaceName}</span>
-                <span>•</span>
-                <span>{transaction.payoutNumber}</span>
-              </div>
+        <div className="relative flex h-full flex-col">
+          <div className="w-full flex items-center justify-end px-5 pt-5 sm:px-7 sm:pt-6">
+            <SheetClose
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  aria-label="Close transaction details"
+                  className="h-9 w-9 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+                />
+              }
+            >
+              <X size={18} strokeWidth={2.05} />
+            </SheetClose>
+          </div>
 
-              <div className="mt-3 rounded-2xl border border-border/60 px-4 py-3.5">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                      <Banknote size={12} />
-                      Amount
-                    </div>
-                    <div className="mt-1 text-[18px] font-bold tracking-tight text-foreground">
-                      {formatCurrency(transaction.amountPaid)}
-                    </div>
+          {/* 2) Heading + summary block (BELOW top close button row — so there's space at top before content) */}
+          <div className="px-6 sm:px-7 pt-4 pb-3">
+            <div className="flex flex-wrap items-center gap-2 text-[13px] text-muted-foreground">
+              <span className="font-semibold text-foreground">{transaction.host.fullName}</span>
+              <span>•</span>
+              <span>{transaction.spaceName}</span>
+              <span>•</span>
+              <span>{transaction.payoutNumber}</span>
+            </div>
+
+            <div className="mt-3 rounded-2xl border border-border/60 px-4 py-3.5">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                    <Banknote size={12} />
+                    Amount
                   </div>
-                  <StatusBadge status={TRANSACTION_STATUS_KEYS[transaction.status]} size="sm" />
+                  <div className="mt-1 text-[18px] font-bold tracking-tight text-foreground">
+                    {formatCurrency(transaction.amountPaid)}
+                  </div>
                 </div>
-              </div>
-
-              <div className="mt-1 border-b border-border/50">
-                <InfoRow
-                  label="Payment Date"
-                  value={
-                    <span className="text-[13px] font-medium text-foreground/90">
-                      {formatDateTime(transaction.paymentDate)}
-                    </span>
-                  }
-                />
-                <InfoRow
-                  label="Booking ID"
-                  value={
-                    <span className="text-[13px] font-medium text-foreground/90">
-                      #{transaction.bookingNumber}
-                    </span>
-                  }
-                />
+                <StatusBadge status={TRANSACTION_STATUS_KEYS[transaction.status]} size="sm" />
               </div>
             </div>
 
-            <SheetClose
-                render={
-                  <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    aria-label="Close"
-                    className="h-8 w-8 rounded-full text-muted-foreground hover:bg-muted"
-                  />
+            <div className="mt-1 border-b border-border/50">
+              <InfoRow
+                label="Payment Date"
+                value={
+                  <span className="text-[13px] font-medium text-foreground/90">
+                    {formatDateTime(transaction.paymentDate)}
+                  </span>
                 }
-              >
-                <X size={16} />
-              </SheetClose>
+              />
+              <InfoRow
+                label="Booking ID"
+                value={
+                  <span className="text-[13px] font-medium text-foreground/90">
+                    #{transaction.bookingNumber}
+                  </span>
+                }
+              />
+            </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-6 pb-4">
+          <div className="flex-1 overflow-y-auto px-6 sm:px-7 pb-4 overscroll-contain scrollbar-gutter-stable">
             <Card className="rounded-2xl border-border/60 shadow-none">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
@@ -416,8 +418,8 @@ export function TransactionDetailsSheet({
             <Card className="mt-4 rounded-2xl border-border/60 shadow-none">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 text-[13px] font-semibold text-foreground">
-                  <Receipt size={14} className="text-primary" />
-                  Payment Breakdown
+                  <Wallet size={15} />
+                  <span>Payment Breakdown</span>
                 </div>
                 <div className="mt-2 text-[13px]">
                   <BreakdownLine

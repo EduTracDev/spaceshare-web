@@ -158,7 +158,7 @@ export function AuditLogsManagementTable(
     <Card className="rounded-2xl border-border/70 bg-card shadow-sm">
       <CardHeader className="space-y-0 px-5 pt-5 pb-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <h2 className="text-[22px] font-semibold tracking-tight">
+          <h2 className="hidden md:block text-[22px] font-semibold tracking-tight">
             Audit Logs
             {query.data && query.data.total > 0
               ? `(${query.data.total})`

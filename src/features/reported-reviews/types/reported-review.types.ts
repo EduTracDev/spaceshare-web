@@ -57,5 +57,5 @@ export interface ReportedReviewQueryParams {
 
 export const REPORTED_REVIEW_STATUS_KEYS: Record<ReportedReviewStatus, StatusKey> = {
   pending: "pending",
-  closed: "completed",
+  closed: "closed",
 };

@@ -33,13 +33,13 @@ export function PageHeader({
     <div
       data-slot="page-header"
       className={cn(
-        "sticky top-0 left-0 right-0 flex h-20 flex-col gap-4 border-b border-sidebar bg-background py-8 lg:py-4 sm:flex-row sm:items-start sm:justify-between z-30",
+        "sticky top-0 left-0 right-0 flex h-22 md:h-20 flex-col gap-4 border-b border-sidebar bg-background py-8 lg:py-4 sm:flex-row sm:items-start sm:justify-between z-30",
         // Internal padding (applied only to text/action insides of header)
         "px-4 sm:px-6 lg:px-8 xl:px-12",
         bleed && [
           // Pull flush with outer PageContainer edges:
           //   matches PageContainer.tsx line 38: `px-4 sm:px-6 lg:px-8`
-          "-mx-4 sm:-mx-6 lg:-mx-8",
+          "lg:-mx-8",
           // Pull flush with top of main (aligns header top with sidebar logo top):
           //   matches layout.tsx `paddingY="md"` → `py-6` per PADDING_Y_MAP
           "",
@@ -61,7 +61,7 @@ export function PageHeader({
           {title}
         </h1>
         {subtitle ? (
-          <p className="mt-1 text-[13px] text-muted-foreground leading-relaxed max-w-2xl">
+          <p className="mt-1 text-[13px] text-muted-foreground leading-relaxed max-w-2xl text-center md:text-left">
             {subtitle}
           </p>
         ) : null}

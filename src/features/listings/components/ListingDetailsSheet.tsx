@@ -3,7 +3,9 @@
 import * as React from "react";
 import {
   Calendar,
+  Check,
   MapPin,
+  PartyPopper,
   Sparkles,
   Tag,
   Users,
@@ -31,9 +33,9 @@ interface ListingDetailsSheetProps {
   onOpenChange: (open: boolean) => void;
   listing: Listing | null;
   actionLoading?: "approve" | "reject" | "suspend" | null;
-  onApprove: (listing: Listing) => void;
-  onReject: (listing: Listing) => void;
-  onSuspend: (listing: Listing) => void;
+  onApprove: () => void;
+  onReject: () => void;
+  onSuspend: () => void;
 }
 
 function formatDateTime(value: string) {
@@ -71,6 +73,7 @@ function MetricCard({
   );
 }
 
+
 export function ListingDetailsSheet({
   open,
   onOpenChange,
@@ -91,252 +94,280 @@ export function ListingDetailsSheet({
   const showReviewsTab = listing.status === "approved" || listing.status === "suspended";
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-[620px] rounded-l-3xl p-0">
-        <div className="flex h-full flex-col">
-          <SheetHeader className="border-b border-border/60 px-5 pt-5 pb-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex min-w-0 items-center gap-3">
-                <UserAvatar
-                  name={listing.host.fullName}
-                  imageUrl={listing.host.avatarUrl}
-                  size="lg"
-                />
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <SheetTitle className="text-[15px] font-semibold">
-                      {listing.host.fullName}
-                    </SheetTitle>
-                    <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                      Host
+    <div className="">
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent className="w-full !max-w-[90vw] sm:!max-w-[820px] md:!max-w-[70vw] lg:!max-w-[60vw] rounded-l-2xl pt-10 outline-none focus:outline-none focus-visible:outline-none ring-0">
+          <div className="flex h-full flex-col">
+            <div className="flex-1 overflow-y-auto px-5 py-4 overscroll-contain scrollbar-gutter-stable">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-4">
+                <TabsList className="h-9 rounded-full bg-muted/60">
+                  <TabsTrigger
+                    value="details"
+                    className="rounded px-4 py-5 text-[12px] font-medium data-active:bg-primary data-active:text-white hover:text-white"
+                  >
+                    Space Details
+                  </TabsTrigger>
+                  {showReviewsTab ? (
+                    <TabsTrigger
+                      value="reviews"
+                      className="rounded px-4 py-5 text-[12px] border border-primary/10 font-bold data-active:bg-primary data-active:text-primary-foreground"
+                    >
+                      Reviews
+                    </TabsTrigger>
+                  ) : null}
+                </TabsList>
+                <SheetHeader className="px-5 pt-5 pb-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <UserAvatar
+                        name={listing.host.fullName}
+                        imageUrl={listing.host.avatarUrl}
+                        size="lg"
+                      />
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <SheetTitle className="text-[15px] font-semibold">
+                            {listing.host.fullName}
+                          </SheetTitle>
+                          <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                            Host
+                          </span>
+                        </div>
+                        <p className="mt-0.5 text-[12px] text-muted-foreground">
+                          {listing.host.totalListings} listings
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </SheetHeader>
+                <TabsContent value="details" className="space-y-4">
+                  <div className="flex items-center gap-2 text-[11px]">
+                    <StatusBadge status={listing.status} size="sm" />
+                    <span className="font-semibold text-[21px] leading-none tracking-tight text-foreground">
+                      {listing.spaceName}
                     </span>
                   </div>
-                  <p className="mt-0.5 text-[12px] text-muted-foreground">
-                    {listing.host.totalListings} listings
-                  </p>
-                </div>
-              </div>
-
-              <SheetClose
-                render={
-                  <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    aria-label="Close"
-                    className="h-8 w-8 rounded-full text-muted-foreground hover:bg-muted"
-                  />
-                }
-              >
-                <X size={16} />
-              </SheetClose>
-            </div>
-          </SheetHeader>
-
-          <div className="flex-1 overflow-y-auto px-5 py-4">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-4">
-              <TabsList className="h-9 rounded-full bg-muted/60 p-1">
-                <TabsTrigger
-                  value="details"
-                  className="rounded-full px-4 text-[12px] font-medium data-active:bg-primary data-active:text-primary-foreground"
-                >
-                  Space Details
-                </TabsTrigger>
-                {showReviewsTab ? (
-                  <TabsTrigger
-                    value="reviews"
-                    className="rounded-full px-4 text-[12px] font-medium data-active:bg-primary data-active:text-primary-foreground"
-                  >
-                    Reviews
-                  </TabsTrigger>
-                ) : null}
-              </TabsList>
-
-              <TabsContent value="details" className="space-y-4">
-                <div className="flex items-center gap-2 text-[11px]">
-                  <StatusBadge status={listing.status} size="sm" />
-                  <span className="font-semibold text-[21px] leading-none tracking-tight text-foreground">
-                    {listing.spaceName}
-                  </span>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
-                  <span className="inline-flex items-center gap-1.5">
-                    <MapPin size={12} />
-                    {listing.location}
-                  </span>
-                  <span className="inline-flex items-center gap-1.5">
-                    <Calendar size={12} />
-                    {formatDateTime(listing.submittedAt)}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-[1fr_92px] gap-3">
-                  <div className="overflow-hidden rounded-2xl border border-border/60">
-                    <img
-                      src={listing.coverImageUrl}
-                      alt={listing.spaceName}
-                      className="h-[194px] w-full object-cover"
-                    />
+                  <div className="flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
+                    <span className="inline-flex items-center gap-1.5">
+                      <MapPin size={12} />
+                      {listing.location}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <Calendar size={12} />
+                      {formatDateTime(listing.submittedAt)}
+                    </span>
                   </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    {listing.gallery.slice(0, 4).map((image, index) => (
-                      <div
-                        key={`${image}-${index}`}
-                        className="overflow-hidden rounded-xl border border-border/60"
-                      >
-                        <img
-                          src={image}
-                          alt={`${listing.spaceName} thumbnail ${index + 1}`}
-                          className="h-[92px] w-full object-cover"
+                  <div className="grid md:grid-cols-[1fr_40%] gap-3">
+                    <div className="overflow-hidden rounded-2xl border border-border/60">
+                      <img
+                        src={listing.coverImageUrl}
+                        alt={listing.spaceName}
+                        className="h-[194px] w-full object-cover"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+                      {listing.gallery.map((image, index) => (
+                        <div
+                          key={`${image}-${index}`}
+                          className="overflow-hidden rounded-lg border border-border/60"
+                        >
+                          <img
+                            src={image}
+                            alt={`${listing.spaceName} thumbnail ${index + 1}`}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <Card className="rounded-2xl border-border/60 shadow-none">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 text-[12px] font-semibold text-foreground">
+                        <Sparkles size={13} className="text-primary" />
+                        Space Details
+                      </div>
+                      <p className="mt-2 text-[12px] leading-5 text-muted-foreground">
+                        {listing.description}
+                      </p>
+                      <div className="mt-4 grid grid-cols-3 gap-3">
+                        <MetricCard
+                          icon={Tag}
+                          label="Category"
+                          value={labelizeCategory(listing.category)}
+                        />
+                        <MetricCard
+                          icon={Users}
+                          label="Capacity"
+                          value={`${listing.capacity} guests`}
+                        />
+                        <MetricCard
+                          icon={Calendar}
+                          label="Price"
+                          value={formatCurrency(listing.price)}
                         />
                       </div>
-                    ))}
-                  </div>
-                </div>
-
-                <Card className="rounded-2xl border-border/60 shadow-none">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 text-[12px] font-semibold text-foreground">
-                      <Sparkles size={13} className="text-primary" />
-                      Space Details
-                    </div>
-                    <p className="mt-2 text-[12px] leading-5 text-muted-foreground">
-                      {listing.description}
-                    </p>
-
-                    <div className="mt-4 grid grid-cols-3 gap-3">
-                      <MetricCard
-                        icon={Tag}
-                        label="Category"
-                        value={labelizeCategory(listing.category)}
-                      />
-                      <MetricCard
-                        icon={Users}
-                        label="Capacity"
-                        value={`${listing.capacity} guests`}
-                      />
-                      <MetricCard
-                        icon={Calendar}
-                        label="Price"
-                        value={formatCurrency(listing.price)}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <div className="grid grid-cols-3 gap-4 text-[12px]">
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-foreground">Amenities</h4>
-                    {listing.amenities.map((item) => (
-                      <div key={item} className="text-muted-foreground">
-                        ✓ {item}
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-foreground">House rules</h4>
-                    {listing.houseRules.map((item) => (
-                      <div key={item} className="text-muted-foreground">
-                        • {item}
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-foreground">Parking Instructions</h4>
-                    {listing.parkingInstructions.map((item) => (
-                      <div key={item} className="text-muted-foreground">
-                        • {item}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <Card className="rounded-2xl border-border/60 shadow-none">
-                  <CardContent className="p-4">
-                    <div className="text-[12px] font-semibold text-foreground">Add-Ons</div>
-                    <div className="mt-3 space-y-2">
-                      {listing.addOns.map((addon) => (
-                        <div
-                          key={addon.id}
-                          className="flex items-center justify-between gap-3 text-[12px]"
-                        >
-                          <div>
-                            <div className="text-foreground">{addon.name}</div>
-                            <div className="text-[11px] text-muted-foreground">
-                              {addon.quantityLabel}
-                            </div>
+                    </CardContent>
+                  </Card>
+                  <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
+                    {/* ROW 1: AMENITIES — full width, internal 3-column grid with check icons */}
+                    <div className="space-y-3 px-5 pt-5 pb-4">
+                      <h4 className="text-[13px] font-bold tracking-tight text-foreground">
+                        Amenities
+                      </h4>
+                      <div className="grid grid-cols-2 gap-x-8 gap-y-3 md:grid-cols-3">
+                        {listing.amenities.map((item) => (
+                          <div
+                            key={item}
+                            className="inline-flex items-center gap-2 text-[13px] font-medium text-foreground/80"
+                          >
+                            <span className="flex h-4 w-4 shrink-0 items-center justify-center text-primary">
+                              <Check size={14} strokeWidth={2.75} />
+                            </span>
+                            {item}
                           </div>
-                          <div className="font-medium text-foreground">
-                            {formatCurrency(addon.price)}
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* DIVIDER between amenity row top / house+parking row bottom */}
+                    <div className="border-t border-border/60" />
+
+                    {/* ROW 2: HOUSE RULES LEFT + PARKING INSTRUCTIONS RIGHT, with a vertical divider down the middle */}
+                    <div className="grid grid-cols-1 gap-0 md:grid-cols-2">
+                      <div className="space-y-3 px-5 py-5">
+                        <h4 className="text-[13px] font-bold tracking-tight text-foreground">
+                          House rules
+                        </h4>
+                        <ul className="space-y-2.5">
+                          {listing.houseRules.map((item) => (
+                            <li
+                              key={item}
+                              className="flex items-start gap-2 text-[13px] leading-5 text-foreground/80"
+                            >
+                              <span className="mt-[7px] block h-1.5 w-1.5 shrink-0 rounded-full bg-foreground/45" />
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {/* Vertical divider — ONLY visible on md+ screens (when cols side-by-side) */}
+                      <div className="hidden md:block relative">
+                        <div className="absolute inset-y-5 left-0 w-px bg-border/70" />
+                      </div>
+
+                      <div className="space-y-3 border-t border-border/60 px-5 py-5 md:border-t-0 md:pl-5">
+                        <h4 className="text-[13px] font-bold tracking-tight text-foreground">
+                          Parking Instructions
+                        </h4>
+                        <ul className="space-y-2.5">
+                          {listing.parkingInstructions.map((item) => (
+                            <li
+                              key={item}
+                              className="flex items-start gap-2 text-[13px] leading-5 text-foreground/80"
+                            >
+                              <span className="mt-[7px] block h-1.5 w-1.5 shrink-0 rounded-full bg-foreground/45" />
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-4 px-2 pt-2">
+                    <div className="flex items-center gap-2">
+                      <PartyPopper size={22} strokeWidth={2} className="text-foreground/80" />
+                      <h3 className="text-[17px] font-bold tracking-tight text-foreground">
+                        Add-Ons
+                      </h3>
+                    </div>
+
+                    <div className="space-y-0">
+                      {listing.addOns.map((addon, idx) => (
+                        <div key={addon.id}>
+                          {idx > 0 ? (
+                            <div className="my-2" />
+                          ) : null}
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="min-w-0 flex items-center gap-3 text-[13px] text-foreground/80">
+                              <span className="truncate font-medium">
+                                {addon.name}
+                              </span>
+                              <span
+                                aria-hidden
+                                className="block h-1 w-1 shrink-0 rounded-full bg-muted-foreground/55"
+                              />
+                              <span>
+                                {addon.quantityLabel}
+                              </span>
+                            </div>
+                            <div className="shrink-0 text-[15.5px] font-semibold tracking-tight text-foreground/90">
+                              {formatCurrency(addon.price)}
+                            </div>
                           </div>
                         </div>
                       ))}
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {showReviewsTab ? (
-                <TabsContent value="reviews">
-                  <ListingReviewsPanel listing={listing} />
+                  </div>
                 </TabsContent>
-              ) : null}
-            </Tabs>
+                {showReviewsTab ? (
+                  <TabsContent value="reviews">
+                    <ListingReviewsPanel listing={listing} />
+                  </TabsContent>
+                ) : null}
+              </Tabs>
+            </div>
+            <div className="border-t border-border/60 bg-muted/20 px-5 py-4">
+              {listing.status === "pending" ? (
+                <div className="flex items-center justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => onReject()}
+                    disabled={actionLoading !== null}
+                    className={cn(
+                      "h-10 rounded-full px-4 text-[13px] font-bold py-5",
+                      "border-red-200 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700"
+                    )}
+                  >
+                    {actionLoading === "reject" ? "Rejecting..." : "Reject Listing"}
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => onApprove()}
+                    disabled={actionLoading !== null}
+                    className="h-10 rounded-full bg-primary px-4 py-5 text-[13px] font-semibold text-primary-foreground hover:bg-primary/90"
+                  >
+                    {actionLoading === "approve" ? "Approving..." : "Approve Listing"}
+                  </Button>
+                </div>
+              ) : listing.status === "approved" ? (
+                <div className="flex items-center justify-end">
+                  <Button
+                    type="button"
+                    onClick={() => onSuspend()}
+                    disabled={actionLoading !== null}
+                    className={cn(
+                      "h-10 rounded-full px-4 py-5 text-[13px] font-medium",
+                      "bg-red-50 text-red-600 hover:bg-red-100"
+                    )}
+                  >
+                    {actionLoading === "suspend" ? "Suspending..." : "Suspend Listing"}
+                  </Button>
+                </div>
+              ) : listing.status === "suspended" ? (
+                <div className="text-right text-[12px] text-muted-foreground">
+                  This listing is currently suspended.
+                </div>
+              ) : (
+                <div className="text-right text-[12px] text-muted-foreground">
+                  This listing has been rejected.
+                </div>
+              )}
+            </div>
           </div>
-
-          <div className="border-t border-border/60 bg-muted/20 px-5 py-4">
-            {listing.status === "pending" ? (
-              <div className="flex items-center justify-end gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onReject(listing)}
-                  disabled={actionLoading !== null}
-                  className={cn(
-                    "h-10 rounded-full px-4 text-[13px] font-medium",
-                    "border-red-200 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700"
-                  )}
-                >
-                  {actionLoading === "reject" ? "Rejecting..." : "Reject Listing"}
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => onApprove(listing)}
-                  disabled={actionLoading !== null}
-                  className="h-10 rounded-full bg-primary px-4 text-[13px] font-semibold text-primary-foreground hover:bg-primary/90"
-                >
-                  {actionLoading === "approve" ? "Approving..." : "Approve Listing"}
-                </Button>
-              </div>
-            ) : listing.status === "approved" ? (
-              <div className="flex items-center justify-end">
-                <Button
-                  type="button"
-                  onClick={() => onSuspend(listing)}
-                  disabled={actionLoading !== null}
-                  className={cn(
-                    "h-10 rounded-full px-4 text-[13px] font-medium",
-                    "bg-red-50 text-red-600 hover:bg-red-100"
-                  )}
-                >
-                  {actionLoading === "suspend" ? "Suspending..." : "Suspend Listing"}
-                </Button>
-              </div>
-            ) : listing.status === "suspended" ? (
-              <div className="text-right text-[12px] text-muted-foreground">
-                This listing is currently suspended.
-              </div>
-            ) : (
-              <div className="text-right text-[12px] text-muted-foreground">
-                This listing has been rejected.
-              </div>
-            )}
-          </div>
-        </div>
-      </SheetContent>
-    </Sheet>
+        </SheetContent>
+      </Sheet>
+    </div>
   );
 }

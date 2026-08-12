@@ -25,13 +25,9 @@ export function buildDisputeColumns(actions: DisputeRowActions): ColumnDef<Dispu
       header: "Dispute ID",
       enableSorting: true,
       cell: ({ row }) => (
-        <button
-          type="button"
-          onClick={() => actions.onViewDetails(row.original)}
-          className="text-[12.5px] font-semibold text-foreground/90 hover:text-primary"
-        >
+        <span className="text-[12.5px] font-semibold text-foreground/90">
           {row.original.disputeNumber}
-        </button>
+        </span>
       ),
     },
     {
@@ -65,13 +61,9 @@ export function buildDisputeColumns(actions: DisputeRowActions): ColumnDef<Dispu
       header: "Space",
       enableSorting: true,
       cell: ({ row }) => (
-        <button
-          type="button"
-          onClick={() => actions.onViewDetails(row.original)}
-          className="text-left text-[13px] text-foreground/85 hover:text-primary"
-        >
+        <span className="block text-left text-[13px] text-foreground/85">
           {row.original.spaceName}
-        </button>
+        </span>
       ),
     },
     {

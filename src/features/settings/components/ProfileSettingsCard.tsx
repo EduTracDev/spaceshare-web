@@ -71,7 +71,7 @@ export function ProfileSettingsCard() {
     mutation.mutate({ fullName: values.fullName });
 
   return (
-    <Card className="rounded-2xl border-border/70 bg-card shadow-sm">
+    <Card className="rounded-none border-none md:rounded-2xl md:border-border/70 bg-card md:shadow-sm">
       <CardHeader className="space-y-0 px-6 pt-6 pb-2">
         <div className="flex items-start gap-3.5">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">

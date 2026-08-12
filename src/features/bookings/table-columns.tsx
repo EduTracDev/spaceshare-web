@@ -26,13 +26,9 @@ export function buildBookingColumns(actions: BookingRowActions): ColumnDef<Booki
       header: "#ID",
       enableSorting: true,
       cell: ({ row }) => (
-        <button
-          type="button"
-          onClick={() => actions.onViewDetails(row.original)}
-          className="text-[12.5px] font-semibold text-foreground/90 hover:text-primary"
-        >
+        <span className="text-[12.5px] font-semibold text-foreground/90">
           {row.original.bookingNumber}
-        </button>
+        </span>
       ),
     },
     {
@@ -56,13 +52,9 @@ export function buildBookingColumns(actions: BookingRowActions): ColumnDef<Booki
       header: "Space",
       enableSorting: true,
       cell: ({ row }) => (
-        <button
-          type="button"
-          onClick={() => actions.onViewDetails(row.original)}
-          className="text-left text-[13px] text-foreground/85 hover:text-primary"
-        >
+        <span className="block text-left text-[13px] text-foreground/85">
           {row.original.spaceName}
-        </button>
+        </span>
       ),
     },
     {

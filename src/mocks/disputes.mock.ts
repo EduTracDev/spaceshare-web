@@ -32,6 +32,7 @@ const EVIDENCE: DisputeEvidenceFile[] = [
     name: "transaction_history.pdf",
     sizeLabel: "1.2 MB",
     kind: "document",
+    mimeType: "application/pdf",
     downloadUrl: "#",
   },
   {
@@ -39,6 +40,7 @@ const EVIDENCE: DisputeEvidenceFile[] = [
     name: "payment_receipt.png",
     sizeLabel: "346 KB",
     kind: "image",
+    mimeType: "image/png",
     downloadUrl: "#",
   },
 ];
@@ -101,6 +103,7 @@ export const MOCK_DISPUTES: Dispute[] = [
     raisedBy: "host",
     reason:
       "\"When we arrived, the space had not been cleaned from the previous event and several amenities listed were missing. We had to delay our setup by 90 minutes and lost time with vendors.\"",
+    evidence: EVIDENCE,
   }),
   createDispute({
     id: "dp-2",
@@ -115,6 +118,7 @@ export const MOCK_DISPUTES: Dispute[] = [
     raisedBy: "guest",
     reason:
       "\"Venue was smaller than advertised; we had to turn guests away at the entrance.\"",
+    evidence: EVIDENCE,
   }),
   createDispute({
     id: "dp-3",
@@ -129,6 +133,7 @@ export const MOCK_DISPUTES: Dispute[] = [
     raisedBy: "guest",
     reason:
       "\"Sound system failed part way through the event and the host was unreachable.\"",
+    evidence: EVIDENCE,
   }),
   createDispute({
     id: "dp-4",
@@ -143,6 +148,7 @@ export const MOCK_DISPUTES: Dispute[] = [
     raisedBy: "guest",
     reason:
       "\"Power outage lasted 3 hours. Host offered no backup generator or partial refund.\"",
+    evidence: EVIDENCE,
   }),
   createDispute({
     id: "dp-5",
@@ -157,6 +163,7 @@ export const MOCK_DISPUTES: Dispute[] = [
     raisedBy: "host",
     reason:
       "\"Guest left venue in severe disrepair with broken furniture we need replaced.\"",
+    evidence: EVIDENCE,
   }),
   createDispute({
     id: "dp-6",
@@ -171,6 +178,7 @@ export const MOCK_DISPUTES: Dispute[] = [
     raisedBy: "guest",
     reason:
       "\"Catering partner listed in the add-ons was a no-show. Venue couldn't locate them.\"",
+    evidence: EVIDENCE,
   }),
   createDispute({
     id: "dp-7",
@@ -185,6 +193,7 @@ export const MOCK_DISPUTES: Dispute[] = [
     raisedBy: "host",
     reason:
       "\"Guest exceeded capacity by almost 40 people despite warnings in contract.\"",
+    evidence: EVIDENCE,
   }),
   createDispute({
     id: "dp-8",
@@ -199,6 +208,7 @@ export const MOCK_DISPUTES: Dispute[] = [
     raisedBy: "guest",
     reason:
       "\"Decoration items listed as included were not provided; we had to purchase day-of.\"",
+    evidence: EVIDENCE,
   }),
   createDispute({
     id: "dp-9",
@@ -213,6 +223,7 @@ export const MOCK_DISPUTES: Dispute[] = [
     raisedBy: "host",
     reason:
       "\"Caution fee dispute: several stained linens and broken glassware items need replacement.\"",
+    evidence: EVIDENCE,
   }),
   createDispute({
     id: "dp-10",
@@ -227,6 +238,7 @@ export const MOCK_DISPUTES: Dispute[] = [
     raisedBy: "guest",
     reason:
       "\"Cleaning was not performed prior to our event start; odor complaints from guests.\"",
+    evidence: EVIDENCE,
   }),
 ];
 

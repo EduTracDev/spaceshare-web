@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import type { ColumnDef, PaginationState, SortingState } from "@tanstack/react-table";
-import { Filter, Search } from "lucide-react";
+import { Filter, ListFilter, Search } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -89,14 +89,14 @@ export function TransactionManagementTable({ onViewDetails }: TransactionManagem
   });
 
   return (
-    <Card className="rounded-2xl border-border/70 bg-card shadow-sm">
-      <CardHeader className="space-y-0 px-5 pt-5 pb-4">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <h2 className="text-[22px] font-semibold tracking-tight">
+    <Card className="md:rounded-2xl md:border-border/70 bg-card md:shadow-sm">
+      <CardHeader className="space-y-0 px-3 md:px-5 pt-2 md:pt-5 pb-4">
+        <div className="flex flex-col gap-4 lg:justify-between">
+          <h2 className="hidden md:block text-[22px] font-semibold tracking-tight">
             Transactions({query.data?.total ?? 0})
           </h2>
 
-          <div className="flex w-full flex-col gap-2 sm:flex-row lg:w-auto">
+          <div className="flex w-full gap-4 lg:gap-4 flex-row lg:w-auto">
             <div className="relative flex-1 lg:w-[290px]">
               <Search
                 size={15}
@@ -110,7 +110,7 @@ export function TransactionManagementTable({ onViewDetails }: TransactionManagem
                   setPagination((prev) => ({ ...prev, pageIndex: 0 }));
                 }}
                 placeholder="Search by bookings..."
-                className="h-11 rounded-xl border-border bg-background pl-10 text-[13px]"
+                className="h-11 rounded-lg lg:rounded-xl border-border bg-background pl-10 text-[13px]"
               />
             </div>
 
@@ -124,8 +124,8 @@ export function TransactionManagementTable({ onViewDetails }: TransactionManagem
                   />
                 }
               >
-                <Filter size={15} className="text-muted-foreground" />
-                Filter
+                <ListFilter size={15} className="text-muted-foreground" />
+                <span className="hidden md:inline">Filter</span>
               </DropdownMenuTrigger>
 
               <DropdownMenuContent align="end" className="mt-1.5 w-48 rounded-2xl p-1">
@@ -167,6 +167,7 @@ export function TransactionManagementTable({ onViewDetails }: TransactionManagem
           onPaginationChange={setPagination}
           sorting={sorting}
           onSortingChange={setSorting}
+          onRowClick={(transaction) => onViewDetails(transaction)}
           searchTerm={search || undefined}
           emptyTitle="No Transactions Yet"
           emptyDescription="Payouts will appear here once bookings are completed and payouts are ready for release."

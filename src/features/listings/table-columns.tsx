@@ -40,16 +40,12 @@ export function buildListingColumns(actions: ListingRowActions): ColumnDef<Listi
         const listing = row.original;
 
         return (
-          <button
-            type="button"
-            onClick={() => actions.onViewDetails(listing)}
-            className="flex w-full flex-col rounded-lg py-1 text-left transition-colors hover:bg-muted/30"
-          >
+          <div className="flex w-full flex-col py-1 text-left">
             <span className="text-[13px] font-medium text-foreground">{listing.spaceName}</span>
             <span className="mt-0.5 text-[11px] text-muted-foreground">
               {CATEGORY_LABELS[listing.category]}
             </span>
-          </button>
+          </div>
         );
       },
     },

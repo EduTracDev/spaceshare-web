@@ -4,6 +4,7 @@ import * as React from "react";
 import {
   AlertTriangle,
   CheckCircle2,
+  CircleAlert,
   Info,
   Trash2,
   type LucideIcon,
@@ -60,10 +61,10 @@ const TONE_CONFIG: Record<
     confirmClass: "bg-amber-600 hover:bg-amber-700 text-white",
   },
   danger: {
-    icon: Trash2,
-    iconClass: "bg-red-50 text-red-600",
+    icon: CircleAlert,
+    iconClass: "bg-red-200/50 text-red-600",
     confirmClass:
-      "bg-destructive hover:bg-destructive/90 text-destructive-foreground",
+      "bg-red-200/50 hover:bg-destructive/90 text-destructive",
   },
 };
 
@@ -109,19 +110,19 @@ export function ConfirmationDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className={cn("rounded-2xl p-3 overflow-hidden", SIZE_CLASS[size])}
+        className={cn("rounded-2xl px-3 py-6 overflow-hidden", SIZE_CLASS[size])}
       >
         <DialogHeader className="p-6 pb-0">
-          <div className="flex items-start gap-4">
+          <div className="">
             <div
               className={cn(
-                "h-11 w-11 shrink-0 rounded-xl flex items-center justify-center",
+                "h-8 w-8 shrink-0 rounded-xl flex items-center justify-center",
                 config.iconClass
               )}
             >
               <Icon size={20} strokeWidth={1.9} />
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 mt-2">
               <DialogTitle className="text-lg font-semibold leading-tight">
                 {title}
               </DialogTitle>
@@ -135,10 +136,10 @@ export function ConfirmationDialog({
         </DialogHeader>
 
         {children ? (
-          <div className="px-6 py-5 space-y-4">{children}</div>
+          <div className="px-6 py-0 md:py-2 md:pb-4 space-y-4">{children}</div>
         ) : null}
 
-        <DialogFooter className="px-6 py-4 border-t border-border/60 bg-muted/20 sm:justify-end flex-col-reverse sm:flex-row sm:space-x-2">
+        <DialogFooter className="px-6 py-4 sm:justify-end flex-col-reverse sm:flex-row sm:space-x-2 bg-background border-none">
           {footer ?? (
             <>
               <Button
@@ -147,7 +148,7 @@ export function ConfirmationDialog({
                 size="sm"
                 onClick={handleCancel}
                 disabled={confirmLoading}
-                className="h-9 rounded-xl px-4 border-border"
+                className="h-9 rounded-xl py-6 md:py-0 px-4 bg-primary/10 text-primary hover:text-primary font-bold hover:font-medium"
               >
                 {cancelLabel}
               </Button>
@@ -157,7 +158,7 @@ export function ConfirmationDialog({
                 onClick={handleConfirm}
                 disabled={confirmLoading || confirmDisabled}
                 className={cn(
-                  "h-9 rounded-xl px-4 gap-1.5",
+                  "h-9 py-6 md:py-0 rounded-xl px-4 gap-1.5 hover:bg-destructive/90 hover:text-white",
                   config.confirmClass,
                   confirmDisabled && "opacity-50 pointer-events-none"
                 )}

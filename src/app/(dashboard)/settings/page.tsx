@@ -19,17 +19,17 @@ export default function SettingsPage() {
             variant="ghost"
             size="icon-sm"
             aria-label="Notifications"
-            className="hidden md:relative h-9 w-9 rounded-full border border-border bg-background text-muted-foreground hover:text-foreground shrink-0"
+            className="hidden lg:inline-flex relative h-9 w-9 rounded-full border bg-gray-100 font-bold hover:animate-pulse text-black/95 hover:text-foreground shrink-0"
           >
             <Bell size={17} />
           </Button>
         }
       />
 
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col md:gap-5 bg-card">
         <ProfileSettingsCard />
 
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <div className="grid grid-cols-1 md:gap-5 lg:grid-cols-2">
           <PasswordSettingsCard />
           <CommissionSettingsCard />
         </div>

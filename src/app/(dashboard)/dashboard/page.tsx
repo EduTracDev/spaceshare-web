@@ -11,6 +11,7 @@ import { UserGrowthChart } from "@/features/dashboard/components/UserGrowthChart
 import { BookingsTrendChart } from "@/features/dashboard/components/BookingsTrendChart";
 import { dashboardService } from "@/services/dashboard.service";
 
+
 export default function DashboardPage() {
   const summaryQ = useQuery({
     queryKey: ["dashboard", "summary"],
@@ -41,9 +42,9 @@ export default function DashboardPage() {
             variant="ghost"
             size="icon-sm"
             aria-label="Notifications"
-            className="hidden md:relative h-9 w-9 rounded-full border border-border bg-background text-muted-foreground hover:text-foreground"
+            className="hidden lg:inline-flex relative h-9 w-9 rounded-full border bg-gray-100 font-bold hover:animate-pulse text-black/95 hover:text-foreground shrink-0"
           >
-            <Bell size={17} />
+            <Bell size={17} className=""/>
           </Button>
         }
       />
@@ -68,7 +69,7 @@ export default function DashboardPage() {
           }}
         />
       ) : (
-        <>
+        <div className="flex flex-col-reverse md:flex-col gap-6">
           {/* Stats Grid */}
           {summaryQ.data ? <StatsGrid data={summaryQ.data} /> : null}
 
@@ -82,7 +83,7 @@ export default function DashboardPage() {
               isLoading={bookingsQ.isLoading && !bookingsQ.data}
             />
           </div>
-        </>
+        </div>
       )}
     </div>
   );

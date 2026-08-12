@@ -10,6 +10,7 @@ export interface DisputeEvidenceFile {
   sizeLabel: string;
   kind: "document" | "image";
   downloadUrl: string;
+  mimeType: string;
 }
 
 export interface DisputeRaisedParty {
@@ -59,6 +60,6 @@ export interface PaginatedDisputes {
 }
 
 export const DISPUTE_STATUS_KEYS: Record<DisputeStatus, StatusKey> = {
-  new: "pending",
-  resolved: "completed",
+  new: "new",
+  resolved: "resolved",
 };

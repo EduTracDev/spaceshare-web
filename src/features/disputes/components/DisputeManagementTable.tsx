@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import type { ColumnDef, PaginationState, SortingState } from "@tanstack/react-table";
-import { Filter, Search, X } from "lucide-react";
+import { ListFilter, Search, X } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -94,13 +94,13 @@ export function DisputeManagementTable({ onViewDetails }: DisputeManagementTable
 
   return (
     <Card className="rounded-2xl border-border/70 bg-card shadow-sm">
-      <CardHeader className="space-y-0 px-5 pt-5 pb-4">
+      <CardHeader className="space-y-0 px-2 md:px-5 pt-2 md:pt-5 pb-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <h2 className="text-[22px] font-semibold tracking-tight">
+          <h2 className="hidden md:block text-[22px] font-semibold tracking-tight">
             Disputes({query.data?.total ?? 0})
           </h2>
 
-          <div className="flex w-full flex-col gap-2 sm:flex-row lg:w-auto">
+          <div className="flex w-full gap-4 lg:gap-2 lg:w-auto">
             <div className="relative flex-1 lg:w-[290px]">
               <Search
                 size={15}
@@ -114,7 +114,7 @@ export function DisputeManagementTable({ onViewDetails }: DisputeManagementTable
                   setPagination((prev) => ({ ...prev, pageIndex: 0 }));
                 }}
                 placeholder="Search disputes..."
-                className="h-11 rounded-xl border-border bg-background pl-10 text-[13px]"
+                className="h-11 rounded-lg md:rounded-xl border-border bg-background pl-10 text-[13px]"
               />
             </div>
 
@@ -145,8 +145,8 @@ export function DisputeManagementTable({ onViewDetails }: DisputeManagementTable
                   />
                 }
               >
-                <Filter size={15} className="text-muted-foreground" />
-                Filter
+                <ListFilter size={15} className="text-muted-foreground" />
+                <span className="hidden md:inline">Filter</span>
               </DropdownMenuTrigger>
 
               <DropdownMenuContent align="end" className="mt-1.5 w-48 rounded-2xl p-1">
@@ -188,6 +188,7 @@ export function DisputeManagementTable({ onViewDetails }: DisputeManagementTable
           onPaginationChange={setPagination}
           sorting={sorting}
           onSortingChange={setSorting}
+          onRowClick={(dispute) => onViewDetails(dispute)}
           searchTerm={search || undefined}
           emptyTitle="No Disputes Yet"
           emptyDescription="Great news. No disputes have been raised on the platform yet. Any future disputes will appear here for review and resolution."

@@ -39,6 +39,8 @@ const STATUS_DOT_COLOR = {
   in_progress: "bg-indigo-500",
   open: "bg-orange-500",
   upcoming: "bg-blue-500",
+  new: "bg-blue-500",
+  closed: "bg-gray-400",
   ongoing: "bg-indigo-500",
   offline: "bg-gray-400",
   pending_invite: "bg-purple-500",
@@ -63,7 +65,7 @@ export function UserAvatar({
     <div className={cn("relative inline-flex shrink-0", className)}>
       <AvatarPrimitive
         className={cn(
-          "rounded-full bg-primary/10 text-primary font-semibold ring-2 ring-background",
+          "rounded-full bg-primary text-white font-semibold ring-2 ring-background",
           SIZE_MAP[size]
         )}
         {...props}

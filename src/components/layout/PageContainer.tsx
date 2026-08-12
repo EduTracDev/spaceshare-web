@@ -35,7 +35,7 @@ export function PageContainer({
     <div
       data-slot="page-container"
       className={cn(
-        "w-full mx-auto px-4 sm:px-6 lg:px-8",
+        "w-full mx-auto px-2 md:px-6 lg:px-8",
         // MAX_WIDTH_MAP[maxWidth],
         // PADDING_Y_MAP[paddingY],
         className

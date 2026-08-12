@@ -2,10 +2,11 @@
 
 import * as React from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Bell } from "lucide-react";
+import { Ban, Bell, CheckCircle2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { ConfirmationDialog } from "@/components/shared/ConfirmationDialog";
 import { ListingManagementTable } from "@/features/listings/components/ListingManagementTable";
 import { ListingDetailsSheet } from "@/features/listings/components/ListingDetailsSheet";
 import { useDisclosure } from "@/hooks/useDisclosure";
@@ -15,6 +16,9 @@ import type { Listing } from "@/features/listings/types/listing.types";
 export default function SpaceListingsPage() {
   const queryClient = useQueryClient();
   const detailsSheet = useDisclosure();
+  const approveDialog = useDisclosure();
+  const rejectDialog = useDisclosure();
+  const suspendDialog = useDisclosure();
   const [selectedListing, setSelectedListing] = React.useState<Listing | null>(null);
 
   const refetchListings = () =>
@@ -65,6 +69,40 @@ export default function SpaceListingsPage() {
       ? "suspend"
       : null;
 
+  const handleConfirmApprove = React.useCallback(() => {
+    if (!selectedListing) return;
+    approveMutation.mutate(selectedListing.id, {
+      onSettled: () => approveDialog.close(),
+    });
+  }, [selectedListing, approveMutation, approveDialog]);
+
+  const handleConfirmReject = React.useCallback(() => {
+    if (!selectedListing) return;
+    rejectMutation.mutate(selectedListing.id, {
+      onSettled: () => rejectDialog.close(),
+    });
+  }, [selectedListing, rejectMutation, rejectDialog]);
+
+  const handleConfirmSuspend = React.useCallback(() => {
+    if (!selectedListing) return;
+    suspendMutation.mutate(selectedListing.id, {
+      onSettled: () => suspendDialog.close(),
+    });
+  }, [selectedListing, suspendMutation, suspendDialog]);
+
+
+  const approveDialogDescription = selectedListing
+    ? `Approve "${selectedListing.spaceName}"? This space will become visible to guests and can start receiving booking requests.`
+    : "This space will become visible to guests and can start receiving booking requests.";
+
+  const rejectDialogDescription = selectedListing
+    ? `Reject "${selectedListing.spaceName}"? This space will NOT be published and the host will be notified of your decision.`
+    : "This space will not be published and the host will be notified of your decision.";
+
+  const suspendDialogDescription = selectedListing
+    ? `Suspend "${selectedListing.spaceName}"? This listing will immediately become unavailable to guests.`
+    : "This listing will immediately become unavailable to guests.";
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader bleed
@@ -75,7 +113,7 @@ export default function SpaceListingsPage() {
             variant="ghost"
             size="icon-sm"
             aria-label="Notifications"
-            className="hidden md:relative h-9 w-9 rounded-full border border-border bg-background text-muted-foreground hover:text-foreground shrink-0"
+            className="hidden lg:inline-flex relative h-9 w-9 rounded-full border bg-gray-100 font-bold hover:animate-pulse text-black/95 hover:text-foreground shrink-0"
           >
             <Bell size={17} />
           </Button>
@@ -94,9 +132,51 @@ export default function SpaceListingsPage() {
         onOpenChange={detailsSheet.toggle}
         listing={selectedListing}
         actionLoading={actionLoading}
-        onApprove={(listing) => approveMutation.mutate(listing.id)}
-        onReject={(listing) => rejectMutation.mutate(listing.id)}
-        onSuspend={(listing) => suspendMutation.mutate(listing.id)}
+        onApprove={() => approveDialog.open()}
+        onReject={() => rejectDialog.open()}
+        onSuspend={() => suspendDialog.open()}
+      />
+
+      <ConfirmationDialog
+        open={approveDialog.isOpen}
+        onOpenChange={approveDialog.toggle}
+        tone="success"
+        icon={CheckCircle2}
+        title="Approve Space Listing"
+        description={approveDialogDescription}
+        confirmLabel="Approve Listing"
+        cancelLabel="Cancel"
+        confirmLoading={approveMutation.isPending}
+        onConfirm={handleConfirmApprove}
+        size="sm"
+      />
+
+      <ConfirmationDialog
+        open={rejectDialog.isOpen}
+        onOpenChange={rejectDialog.toggle}
+        tone="danger"
+        icon={Trash2}
+        title="Reject Space Listing"
+        description={rejectDialogDescription}
+        confirmLabel="Reject Listing"
+        cancelLabel="Cancel"
+        confirmLoading={rejectMutation.isPending}
+        onConfirm={handleConfirmReject}
+        size="sm"
+      />
+
+      <ConfirmationDialog
+        open={suspendDialog.isOpen}
+        onOpenChange={suspendDialog.toggle}
+        tone="warning"
+        icon={Ban}
+        title="Suspend Space Listing"
+        description={suspendDialogDescription}
+        confirmLabel="Suspend Listing"
+        cancelLabel="Cancel"
+        confirmLoading={suspendMutation.isPending}
+        onConfirm={handleConfirmSuspend}
+        size="sm"
       />
     </div>
   );

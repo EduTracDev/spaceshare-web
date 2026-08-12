@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { X, MapPin, Users, Calendar, Clock, Receipt } from "lucide-react";
+import { X, MapPin, Users, Calendar, Clock, Receipt, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -46,12 +46,12 @@ function InfoTile({
   value: string;
 }) {
   return (
-    <div className="rounded-xl border border-border/60 px-3 py-3">
-      <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-        <Icon size={12} />
+    <div className="space-y-2 rounded-xl border border-border/60 px-3 py-3">
+      <Icon size={12} />
+      <div className="text-[11px] text-muted-foreground">
         {label}
       </div>
-      <div className="mt-1.5 text-[13px] font-medium text-foreground">{value}</div>
+      <div className="text-[11px] font-medium text-foreground">{value}</div>
     </div>
   );
 }
@@ -107,10 +107,27 @@ export function BookingDetailsSheet({
       <SheetContent
         showCloseButton={false}
         side="right"
-        className="sm:max-w-[560px] min-h-full overflow-hidden rounded-l-3xl p-0 border-l"
+        className="!max-w-[92vw] md:!max-w-[80vw] lg:!max-w-[40vw] min-h-full overflow-hidden rounded-l-lg md:rounded-l-3xl p-0 border-l-none outline-none focus:outline-none focus-visible:outline-none ring-0"
       >
-        <div className="flex h-full flex-col">
-          <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-3">
+        <div className="relative flex h-full flex-col">
+          {/* 1) TOP close button row (X at very top-right, matches Figma screenshot exactly) */}
+          <div className="w-full flex items-center justify-end px-5 pt-5 sm:px-7 sm:pt-6">
+            <SheetClose
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  aria-label="Close booking details"
+                  className="h-9 w-9 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+                />
+              }
+            >
+              <X size={18} strokeWidth={2.05} />
+            </SheetClose>
+          </div>
+
+          {/* 2) Heading + metadata (BELOW the top close button row — so there's whitespace top before content) */}
+          <div className="px-6 sm:px-7 pt-4 pb-4">
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="text-[18px] font-bold tracking-tight text-foreground">
@@ -121,7 +138,7 @@ export function BookingDetailsSheet({
                   {booking.bookingNumber}
                 </span>
                 <span className="text-[12px] text-muted-foreground">•</span>
-                <StatusBadge status={BOOKING_STATUS_KEYS[booking.status]} size="sm" />
+                <StatusBadge status={BOOKING_STATUS_KEYS[booking.status]} size="md" />
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-4 text-[11px] text-muted-foreground">
                 <span className="inline-flex items-center gap-1.5">
@@ -134,22 +151,9 @@ export function BookingDetailsSheet({
                 </span>
               </div>
             </div>
-
-            <SheetClose
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  aria-label="Close"
-                  className="h-8 w-8 rounded-full text-muted-foreground hover:bg-muted"
-                />
-              }
-            >
-              <X size={16} />
-            </SheetClose>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-6 py-2">
+          <div className="flex-1 overflow-y-auto px-6 sm:px-7 pb-4 overscroll-contain scrollbar-gutter-stable">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <InfoTile
                 icon={Calendar}
@@ -169,7 +173,7 @@ export function BookingDetailsSheet({
               />
             </div>
 
-            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-3">
               <PartyCard
                 label="Host"
                 labelClassName="bg-brand-50 text-primary"
@@ -187,7 +191,7 @@ export function BookingDetailsSheet({
             <Card className="mt-5 rounded-2xl border-border/60 shadow-none">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 text-[13px] font-semibold text-foreground">
-                  <Receipt size={14} className="text-primary" />
+                  <Wallet size={15} className="text-primary" />
                   Payment Breakdown
                 </div>
 
@@ -233,7 +237,8 @@ export function BookingDetailsSheet({
             <div className="h-6" />
           </div>
 
-          <div className="border-t border-border/60 bg-muted/20 px-6 py-4">
+          {/* Review. Can Admin cancel boooking? If yes thiw would be implemented here */}
+          {/* <div className="border-t border-border/60 bg-muted/20 px-6 py-4">
             {booking.status === "pending" ? (
               <div className="flex flex-wrap items-center justify-end gap-2">
                 <Button
@@ -303,7 +308,7 @@ export function BookingDetailsSheet({
                 This booking has been cancelled.
               </div>
             )}
-          </div>
+          </div> */}
         </div>
       </SheetContent>
     </Sheet>

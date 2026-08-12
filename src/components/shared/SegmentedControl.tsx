@@ -48,7 +48,7 @@ export function SegmentedControl<T extends string = string>({
       role="tablist"
       aria-orientation="horizontal"
       className={cn(
-        "inline-flex items-center shrink-0",
+        "hidden md:inline-flex items-center shrink-0 py-2",
         base,
         sizing,
         className
@@ -65,14 +65,14 @@ export function SegmentedControl<T extends string = string>({
             disabled={opt.disabled}
             onClick={() => !opt.disabled && onValueChange(opt.value)}
             className={cn(
-              "inline-flex items-center gap-1.5 font-semibold transition-all",
+              "inline-flex items-center gap-1.5 py-5 font-semibold transition-all",
               pillSize,
               selected ? pillActive : pillInactive,
               opt.disabled && "opacity-50 cursor-not-allowed pointer-events-none"
             )}
           >
             <span>{opt.label}</span>
-            {typeof opt.count !== "undefined" ? (
+            {/* {typeof opt.count !== "undefined" ? (
               <span
                 className={cn(
                   "inline-flex items-center justify-center h-4 min-w-[16px] px-1 rounded-full text-[10px] font-bold",
@@ -83,7 +83,7 @@ export function SegmentedControl<T extends string = string>({
               >
                 {opt.count}
               </span>
-            ) : null}
+            ) : null} */}
           </button>
         );
       })}

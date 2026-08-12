@@ -7,7 +7,7 @@ import type {
   PaginationState,
   ColumnDef,
 } from "@tanstack/react-table";
-import { Filter, ArrowUpDown } from "lucide-react";
+import { Filter, ArrowUpDown, Search, ListFilter } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -103,17 +103,16 @@ export function UserManagementTable({
   const statusLabel = STATUS_OPTIONS.find((s) => s.value === status)?.label ?? "All";
 
   return (
-    <Card className="rounded-2xl border-border/70 bg-card shadow-sm">
-      <CardHeader className="flex flex-col gap-5 px-5 pt-5 pb-4 space-y-0">
-        {/* Top row: Users heading + Invite button */}
-        <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <h2 className="text-xl font-semibold tracking-tight">Users</h2>
+    <Card className="bg-card md:rounded-2xl md:border-border/70 md:shadow-sm">
+      <CardHeader className="flex flex-col gap-5 px-3 md:px-5 pt-2 md:pt-5 pb-4 space-y-0">
+        <div className="w-full flex md:items-center justify-between gap-3">
+          <h2 className="hidden md:block text-xl font-semibold tracking-tight">Users</h2>
           <Button
             type="button"
             onClick={onInviteAdminClick}
-            className="h-10 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground px-5 text-[13px] font-semibold shadow-[0_6px_16px_-6px_rgba(98,0,238,0.5)] self-start sm:self-auto"
+            className="h-10 rounded md:rounded-full bg-primary hover:bg-primary/90 text-primary-foreground px-5 text-[13px] font-semibold shadow-[0_6px_16px_-6px_rgba(98,0,238,0.5)] self-start sm:self-auto border-none outline-none"
           >
-            Invite Admin User
+            Invite Admin <span className="hidden md:inline">User</span>
           </Button>
         </div>
 
@@ -134,7 +133,7 @@ export function UserManagementTable({
                 aria-hidden
                 className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/70 pointer-events-none"
               >
-                🔍
+                <Search size={16} className="text-muted-foreground" />
               </span>
               <Input
                 type="search"
@@ -159,12 +158,12 @@ export function UserManagementTable({
                   />
                 }
               >
-                <Filter size={15} className="text-primary" />
-                <span className="text-muted-foreground">Status:</span>
-                <span className="text-foreground font-semibold">{statusLabel}</span>
-                <ArrowUpDown size={13} className="text-muted-foreground ml-0.5" />
+                <ListFilter size={15} className="text-primary" />
+                <span className="hidden md:inline text-muted-foreground">Status:</span>
+                <span className="hidden md:inline text-foreground font-semibold">{statusLabel}</span>
+                <ArrowUpDown size={13} className="hidden md:inline text-muted-foreground ml-0.5" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 rounded-2xl p-1 mt-1.5">
+              <DropdownMenuContent align="end" className="w-48 rounded-2xl p-1">
                 <DropdownMenuGroup>
                   <DropdownMenuLabel className="px-2.5 text-[11px] uppercase tracking-wider text-muted-foreground">
                     Filter by status
@@ -190,7 +189,7 @@ export function UserManagementTable({
         </div>
       </CardHeader>
 
-      <CardContent className="px-0 pb-5 pt-0 border">
+      <CardContent className="px-0 pb-5 pt-0 md:border">
         <DataTable<AnyUser, unknown>
           columns={columns}
           data={query.data?.items ?? []}
@@ -206,6 +205,7 @@ export function UserManagementTable({
           onPaginationChange={setPagination}
           sorting={sorting}
           onSortingChange={setSorting}
+          onRowClick={(user) => onViewDetails(user)}
           searchTerm={search || undefined}
           emptyTitle="No Users Found"
           emptyDescription="There are currently no users matching your search or filter criteria. Try adjusting your filters or check back later as new users join the platform."
