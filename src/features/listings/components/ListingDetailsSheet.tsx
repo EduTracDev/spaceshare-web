@@ -84,14 +84,17 @@ export function ListingDetailsSheet({
   onSuspend,
 }: ListingDetailsSheetProps) {
   const [activeTab, setActiveTab] = React.useState("details");
+  const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
 
+  // Reset tab + selected large image whenever user opens a DIFFERENT listing
   React.useEffect(() => {
     setActiveTab("details");
+    setSelectedImageIndex(0);
   }, [listing?.id, listing?.status]);
 
   if (!listing) return null;
-
-  const showReviewsTab = listing.status === "approved" || listing.status === "suspended";
+  const listReviews = listing?.reviews ?? []
+  const showReviewsTab = (listing.status === "approved" || listing.status === "suspended") && listReviews.length > 0;
 
   return (
     <div className="">
@@ -100,22 +103,20 @@ export function ListingDetailsSheet({
           <div className="flex h-full flex-col">
             <div className="flex-1 overflow-y-auto px-5 py-4 overscroll-contain scrollbar-gutter-stable">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-4">
-                <TabsList className="h-9 rounded-full bg-muted/60">
-                  <TabsTrigger
-                    value="details"
-                    className="rounded px-4 py-5 text-[12px] font-medium data-active:bg-primary data-active:text-white hover:text-white"
-                  >
-                    Space Details
-                  </TabsTrigger>
-                  {showReviewsTab ? (
+                { showReviewsTab ? (
+                  <TabsList className="!h-12 rounded-full bg-muted/90">
+                    <TabsTrigger
+                      value="details"
+                      className="rounded px-4 text-[12px] font-bold data-active:bg-primary data-active:text-white">
+                      Space Details
+                    </TabsTrigger>
                     <TabsTrigger
                       value="reviews"
-                      className="rounded px-4 py-5 text-[12px] border border-primary/10 font-bold data-active:bg-primary data-active:text-primary-foreground"
-                    >
+                      className="rounded px-4 text-[12px] font-bold data-active:bg-primary data-active:text-white">
                       Reviews
                     </TabsTrigger>
-                  ) : null}
-                </TabsList>
+                  </TabsList>
+                ) : null}
                 <SheetHeader className="px-5 pt-5 pb-4">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex min-w-0 items-center gap-3">
@@ -140,44 +141,60 @@ export function ListingDetailsSheet({
                     </div>
                   </div>
                 </SheetHeader>
-                <TabsContent value="details" className="space-y-4">
-                  <div className="flex items-center gap-2 text-[11px]">
+                <TabsContent value="details" className="space-y-5">
+                  <div className="space-y-4">
                     <StatusBadge status={listing.status} size="sm" />
-                    <span className="font-semibold text-[21px] leading-none tracking-tight text-foreground">
-                      {listing.spaceName}
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
-                    <span className="inline-flex items-center gap-1.5">
-                      <MapPin size={12} />
-                      {listing.location}
-                    </span>
-                    <span className="inline-flex items-center gap-1.5">
-                      <Calendar size={12} />
-                      {formatDateTime(listing.submittedAt)}
-                    </span>
+                    <div className="flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground mb-5">
+                      <span className="font-semibold text-[21px] leading-none tracking-tight text-foreground">
+                        {listing.spaceName}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <MapPin size={12} />
+                        {listing.location}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <Calendar size={12} />
+                        {formatDateTime(listing.submittedAt)}
+                      </span>
+                    </div>
                   </div>
                   <div className="grid md:grid-cols-[1fr_40%] gap-3">
                     <div className="overflow-hidden rounded-2xl border border-border/60">
                       <img
-                        src={listing.coverImageUrl}
-                        alt={listing.spaceName}
+                        src={listing.gallery[selectedImageIndex] ?? listing.gallery[0]}
+                        alt={`${listing.spaceName} preview`}
                         className="h-[194px] w-full object-cover"
                       />
                     </div>
                     <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
-                      {listing.gallery.map((image, index) => (
-                        <div
-                          key={`${image}-${index}`}
-                          className="overflow-hidden rounded-lg border border-border/60"
-                        >
-                          <img
-                            src={image}
-                            alt={`${listing.spaceName} thumbnail ${index + 1}`}
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-                      ))}
+                      {listing.gallery.map((image, index) => {
+                        const isSelected = selectedImageIndex === index;
+                        return (
+                          <button
+                            type="button"
+                            key={`${image}-${index}`}
+                            onClick={() => setSelectedImageIndex(index)}
+                            aria-label={`View photo ${index + 1} of ${listing.spaceName} large`}
+                            aria-pressed={isSelected}
+                            className={cn(
+                              "group block overflow-hidden rounded-lg border transition-all",
+                              isSelected
+                                ? "ring-2 ring-primary/70 ring-offset-1 shadow-sm scale-[1.01]"
+                                : "hover:border-primary/60 hover:ring-1 hover:ring-primary/40"
+                            )}
+                          >
+                            <img
+                              src={image}
+                              alt={`${listing.spaceName} thumbnail ${index + 1}`}
+                              loading="lazy"
+                              className={cn(
+                                "h-full w-full object-cover transition-all duration-200",
+                                isSelected ? "opacity-100" : "opacity-95 group-hover:opacity-100"
+                              )}
+                            />
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                   <Card className="rounded-2xl border-border/60 shadow-none">
