@@ -299,7 +299,7 @@ export function DataTable<TData, TValue>({
                     <TableHead
                       key={header.id}
                       className={cn(
-                        "h-11 px-5 text-lg font-semibold tracking-wider text-black",
+                        "h-11 px-5 text-[15px] font-semibold tracking-wider text-black",
                         cellVerticalPadding === "sm" ? "py-2.5" : "py-3"
                       )}
                     >
