@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { PageContainer } from "@/components/layout/PageContainer";
+import {
+  NotificationDrawerProvider,
+  MobileBell,
+} from "@/features/notifications/providers/NotificationDrawerProvider";
 
 export const metadata: Metadata = {
   title: { default: "Dashboard", template: "%s | SpaceShare Admin" },
@@ -17,8 +21,10 @@ export default function DashboardLayout({
   return (
     <div className="flex min-h-screen w-full text-foreground">
       <Sidebar />
-      <main className="flex-1 min-w-0 bg-sidebar">
-        <div className="flex items-center border-b border-sidebar-border bg-background px-4 py-3 lg:hidden">
+      <NotificationDrawerProvider>
+        <main className="flex-1 min-w-0 bg-sidebar">
+          {/* Notifications bell should be within here */}
+          <div className="flex items-center border-b border-sidebar-border bg-background px-4 py-3 lg:hidden">
           <button
             id={MOBILE_NAV_TOGGLE_ID}
             type="button"
@@ -50,12 +56,16 @@ export default function DashboardLayout({
               SpaceShare
             </span>
           </div>
+          <div className="ml-auto flex items-center justify-end shrink-0">
+            <MobileBell />
+          </div>
         </div>
 
-        <PageContainer paddingY="md">
-          {children}
-        </PageContainer>
-      </main>
+          <PageContainer paddingY="md">
+            {children}
+          </PageContainer>
+        </main>
+      </NotificationDrawerProvider>
     </div>
   );
 }

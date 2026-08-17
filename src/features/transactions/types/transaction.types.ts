@@ -5,7 +5,6 @@ export type TransactionStatus =
   | "paid"
   | "failed"
   | "success"
-  | "completed"
   | "cancelled";
 
 export type TransactionStatusFilter = "all" | TransactionStatus;
@@ -93,6 +92,5 @@ export const TRANSACTION_STATUS_KEYS: Record<TransactionStatus, StatusKey> = {
   paid: "approved",
   failed: "failed",
   success: "completed",
-  completed: "completed",
   cancelled: "cancelled",
 };

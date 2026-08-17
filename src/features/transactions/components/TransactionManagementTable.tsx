@@ -39,7 +39,6 @@ const STATUS_OPTIONS: { value: TransactionStatusFilter; label: string }[] = [
   { value: "paid", label: "Paid" },
   { value: "failed", label: "Failed" },
   { value: "success", label: "Success" },
-  { value: "completed", label: "Completed" },
   { value: "cancelled", label: "Cancelled" },
 ];
 

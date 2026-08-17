@@ -1,8 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { Bell } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ProfileSettingsCard } from "@/features/settings/components/ProfileSettingsCard";
 import { PasswordSettingsCard } from "@/features/settings/components/PasswordSettingsCard";
@@ -14,16 +12,6 @@ export default function SettingsPage() {
       <PageHeader bleed
         title="Settings"
         subtitle="Manage your account and platform commission."
-        actions={
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Notifications"
-            className="hidden lg:inline-flex relative h-9 w-9 rounded-full border bg-gray-100 font-bold hover:animate-pulse text-black/95 hover:text-foreground shrink-0"
-          >
-            <Bell size={17} />
-          </Button>
-        }
       />
 
       <div className="flex flex-col md:gap-5 bg-card">

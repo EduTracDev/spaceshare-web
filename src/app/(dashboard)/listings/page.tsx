@@ -2,9 +2,8 @@
 
 import * as React from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Ban, Bell, CheckCircle2, Trash2 } from "lucide-react";
+import { Ban, CheckCircle2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ConfirmationDialog } from "@/components/shared/ConfirmationDialog";
 import { ListingManagementTable } from "@/features/listings/components/ListingManagementTable";
@@ -108,16 +107,6 @@ export default function SpaceListingsPage() {
       <PageHeader bleed
         title="Space Listings"
         subtitle="Review, approve and moderate event spaces."
-        actions={
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Notifications"
-            className="hidden lg:inline-flex relative h-9 w-9 rounded-full border bg-gray-100 font-bold hover:animate-pulse text-black/95 hover:text-foreground shrink-0"
-          >
-            <Bell size={17} />
-          </Button>
-        }
       />
 
       <ListingManagementTable

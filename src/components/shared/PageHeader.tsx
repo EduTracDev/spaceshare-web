@@ -1,13 +1,18 @@
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DesktopBell } from "@/features/notifications/providers/NotificationDrawerProvider";
 
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
-  /** Right-slot: pass bell icon + export/print buttons or any actions */
+  /** Right-slot: pass page-specific buttons (e.g. Export, New Item). The notification bell is rendered automatically (opt out with hideNotificationBell). */
   actions?: React.ReactNode;
+  /** Set true to hide the default desktop notification bell for this page. */
+  hideNotificationBell?: boolean;
   backHref?: string;
   backLabel?: string;
   /**
@@ -24,6 +29,7 @@ export function PageHeader({
   title,
   subtitle,
   actions,
+  hideNotificationBell = false,
   backHref,
   backLabel = "Back",
   bleed = false,
@@ -67,11 +73,14 @@ export function PageHeader({
         ) : null}
       </div>
 
-      {actions ? (
-        <div className="flex items-center gap-1.5 shrink-0 flex-wrap h-full">
-          {actions}
-        </div>
-      ) : null}
+      <div className="flex items-center gap-2.5 shrink-0 flex-wrap h-full">
+        {actions ? (
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {actions}
+          </div>
+        ) : null}
+        {!hideNotificationBell ? <DesktopBell /> : null}
+      </div>
     </div>
   );
 }

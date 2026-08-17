@@ -2,9 +2,8 @@
 
 import * as React from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Bell, CircleCheckBig } from "lucide-react";
+import { CircleCheckBig } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ConfirmationDialog } from "@/components/shared/ConfirmationDialog";
 import { UserManagementTable } from "@/features/users/components/UserManagementTable";
@@ -58,20 +57,9 @@ export default function UsersManagementPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
-        bleed
+      <PageHeader bleed
         title="User Management"
         subtitle="Manage hosts and guests across SpaceShare."
-        actions={
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Notifications"
-            className="hidden lg:inline-flex relative h-9 w-9 rounded-full border bg-gray-100 font-bold hover:animate-pulse text-black/95 hover:text-foreground shrink-0"
-          >
-            <Bell size={17} />
-          </Button>
-        }
       />
 
       <UserManagementTable

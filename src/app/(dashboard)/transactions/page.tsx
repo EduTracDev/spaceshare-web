@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Bell, CheckCircle2, Copy } from "lucide-react";
+import { CheckCircle2, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -121,16 +121,7 @@ export default function TransactionsPage() {
       <PageHeader bleed
         title="Transaction"
         subtitle="Review and release host payouts."
-        actions={
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Notifications"
-            className="hidden lg:inline-flex relative h-9 w-9 rounded-full border bg-gray-100 font-bold hover:animate-pulse text-black/95 hover:text-foreground shrink-0"
-          >
-            <Bell size={17} />
-          </Button>
-        }
+
       />
 
       <TransactionManagementTable

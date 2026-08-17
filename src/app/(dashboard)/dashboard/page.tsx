@@ -1,8 +1,6 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Bell } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
@@ -37,16 +35,6 @@ export default function DashboardPage() {
         bleed
         title="Admin Dashboard"
         subtitle="Welcome back, Admin - here's what's happening on SpaceShare."
-        actions={
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Notifications"
-            className="hidden lg:inline-flex relative h-9 w-9 rounded-full border bg-gray-100 font-bold hover:animate-pulse text-black/95 hover:text-foreground shrink-0"
-          >
-            <Bell size={17} className=""/>
-          </Button>
-        }
       />
 
       {isLoading && !summaryQ.data ? (

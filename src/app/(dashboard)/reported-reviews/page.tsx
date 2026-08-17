@@ -2,9 +2,7 @@
 
 import * as React from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Bell } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ReportedReviewsGrid } from "@/features/reported-reviews/components/ReportedReviewsGrid";
 import { RetainReviewDialog } from "@/features/reported-reviews/components/RetainReviewDialog";
@@ -72,16 +70,6 @@ export default function ReportedReviewsPage() {
       <PageHeader bleed
         title="Reported Reviews"
         subtitle="Review and moderate reported reviews on space."
-        actions={
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Notifications"
-            className="hidden lg:inline-flex relative h-9 w-9 rounded-full border bg-gray-100 font-bold hover:animate-pulse text-black/95 hover:text-foreground shrink-0"
-          >
-            <Bell size={17} />
-          </Button>
-        }
       />
 
       <ReportedReviewsGrid onRetain={handleRetain} onRemove={handleRemove} />

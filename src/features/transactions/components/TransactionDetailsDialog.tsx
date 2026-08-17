@@ -229,7 +229,7 @@ export function TransactionDetailsSheet({
               </CardContent>
             </Card>
 
-            {transaction.status === "completed" && transaction.guest ? (
+            {transaction.status === "success" && transaction.guest ? (
               <Card className="mt-4 rounded-2xl border-border/60 shadow-none">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
@@ -446,7 +446,7 @@ export function TransactionDetailsSheet({
           </div>
 
           <div className="border-t border-border/60 bg-muted/20 px-6 py-4">
-            {transaction.status === "pending" || transaction.status === "completed" ? (
+            {transaction.status === "pending" ? (
               <div className="flex items-center justify-end">
                 <Button
                   type="button"

@@ -312,7 +312,7 @@ export const MOCK_SKYLINE_TRANSACTIONS: Record<
     amountPaid: 348250,
     commission: 6250,
     netPayout: 342250,
-    status: "completed",
+    status: "success",
   }),
   paid: createTransaction({
     id: "tx-skyline-paid",
