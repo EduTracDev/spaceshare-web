@@ -37,6 +37,7 @@ import {
 } from "@/features/notifications/utils/date-grouping";
 import { cn } from "@/lib/utils";
 import dataAlert from "@/assets/data-alert.svg";
+import Image from "next/image";
 
 /* -------------------------------------------------------------------------- */
 /*                         Small reusable sub-components                      */
@@ -188,7 +189,7 @@ function EmptyStateIllustration({ variant }: { variant: "empty-total" | "all-cau
     <div className="flex flex-col items-center justify-center px-4 py-14 text-center">
       <div className="relative mb-6">
         <div className="flex justify-center items-center gap-0">
-          <img src={dataAlert} alt="no data" loading="eager"/>
+          <Image src={dataAlert} height={100} width={100} alt="no data" loading="eager"/>
         </div>
       </div>
       {variant === "empty-total" ? (
@@ -295,6 +296,7 @@ export function NotificationDrawer({ open, onOpenChange }: NotificationDrawerPro
         >
           <div className="flex h-full w-full flex-col">
             {/* ---------- TOP close button row (same pattern as other detail sheets) ---------- */}
+
           <div className="w-full flex items-center justify-end px-5 pt-5 sm:px-7 sm:pt-6">
             <SheetClose
               render={
