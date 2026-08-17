@@ -36,6 +36,7 @@ import {
   groupNotificationsByDate,
 } from "@/features/notifications/utils/date-grouping";
 import { cn } from "@/lib/utils";
+import dataAlert from "@/assets/data-alert.svg";
 
 /* -------------------------------------------------------------------------- */
 /*                         Small reusable sub-components                      */
@@ -186,8 +187,8 @@ function EmptyStateIllustration({ variant }: { variant: "empty-total" | "all-cau
   return (
     <div className="flex flex-col items-center justify-center px-4 py-14 text-center">
       <div className="relative mb-6">
-        <div className="flex justify-center item-center gap-0">
-          <img src="data-alert.svg" />
+        <div className="flex justify-center items-center gap-0">
+          <img src={dataAlert} alt="no data" loading="eager"/>
         </div>
       </div>
       {variant === "empty-total" ? (
