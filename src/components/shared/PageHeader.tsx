@@ -63,11 +63,11 @@ export function PageHeader({
             {backLabel}
           </Link>
         ) : null}
-        <h1 className="text-[22px] font-bold text-foreground text-center md:text-left tracking-tight leading-tight">
+        <h1 className="text-[22px] font-bold text-foreground text-left tracking-tight leading-tight">
           {title}
         </h1>
         {subtitle ? (
-          <p className="mt-1 text-[13px] text-muted-foreground leading-relaxed max-w-2xl text-center md:text-left">
+          <p className="mt-1 text-[13px] text-muted-foreground leading-relaxed max-w-2xl text-left">
             {subtitle}
           </p>
         ) : null}
