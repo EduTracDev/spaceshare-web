@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { UserCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SIDEBAR_NAV_ITEMS, LOGOUT_ITEM } from "@/constants/navigation";
+import { authService } from "@/services/auth.service";
 import {
   Sheet,
   SheetContent,
@@ -71,11 +72,19 @@ export function Sidebar() {
     []
   );
 
-  const handleLogoutClick = React.useCallback(() => {
-        
+  const handleLogoutClick = React.useCallback(async () => {
     setMobileOpen(false);
-    router.replace("/login");
-  }, [router]);
+    
+    try {
+      await authService.logout();
+    } catch (err) {
+      console.warn("logout cleanup warning:", err);
+    }
+    const redirectTo = encodeURIComponent("/dashboard");
+    if (typeof window !== "undefined") {
+      window.location.assign(`/login?next=${redirectTo}`);
+    }
+  }, []);
 
 
 

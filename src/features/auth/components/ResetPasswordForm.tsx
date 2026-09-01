@@ -34,7 +34,9 @@ function getStrength(password: string): { score: 0 | 1 | 2 | 3 | 4; label: strin
 
 export function ResetPasswordForm() {
   const searchParams = useSearchParams();
-  const token = searchParams.get("token") ?? "mock-reset-token";
+  const code = searchParams.get("token");
+  const email = searchParams.get("email");
+
 
   const [showPwd, setShowPwd] = React.useState(false);
   const [showConfirm, setShowConfirm] = React.useState(false);
@@ -62,8 +64,45 @@ export function ResetPasswordForm() {
   });
 
   const onSubmit = (values: ResetPasswordSchemaValues) => {
-    mutation.mutate({ token, password: values.password, confirmPassword: values.confirmPassword });
+    if (!code || !email) return;
+    mutation.mutate({ code, password: values.password, confirmPassword: values.confirmPassword, email});
   };
+
+  // Invalid/missing reset link
+  if (!code || !email) {
+    return (
+      <div className="w-full">
+        <Link
+          href="/login"
+          className="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 mb-10 transition-colors"
+        >
+          <ArrowLeft size={16} />
+          Back to Log in
+        </Link>
+
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Invalid Password Reset Link
+          </h1>
+
+          <p className="text-gray-600 text-sm leading-relaxed mb-8">
+            This password reset link is invalid or incomplete. Please request
+            a new password reset link.
+          </p>
+
+          <Link href="/forgot-password">
+            <Button
+              size="lg"
+              className="w-full h-12 rounded-full text-sm font-medium bg-[#6200EE] hover:bg-[#5400D0] text-white"
+            >
+              Request New Reset Link
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }  
+
 
   if (passwordUpdated) {
     return (
@@ -234,7 +273,7 @@ export function ResetPasswordForm() {
           size="lg"
           disabled={!formFilled || mutation.isPending}
           className={
-            "w-full h-12 rounded-full text-sm font-medium transition-all " +
+            "w-full h-12 active:h-12 rounded-full text-sm font-medium transition-all " +
             (formFilled && !mutation.isPending
               ? "bg-[#6200EE] hover:bg-[#5400D0] text-white shadow-[0_8px_20px_-6px_rgba(98,0,238,0.4)]"
               : "bg-[#D1C4FE] text-white cursor-not-allowed shadow-none hover:bg-[#D1C4FE]")
@@ -243,13 +282,15 @@ export function ResetPasswordForm() {
           {mutation.isPending ? "Updating password…" : "Reset Password"}
         </Button>
 
-        {mutation.isError ? (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {mutation.error instanceof Error
-              ? mutation.error.message
-              : "Password reset failed. Please try again."}
-          </div>
-        ) : null}
+        <div className="h-8">
+          {mutation.isError ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {mutation.error instanceof Error
+                ? mutation.error.message
+                : "Password reset failed. Please try again."}
+            </div>
+          ) : null}
+        </div>
       </form>
     </div>
   );

@@ -22,27 +22,32 @@ export const authService = {
       const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/auth/login`, payload);
       const data = await response.data;
       const token = data?.data?.token;
-      //set token to local storage for now
       if (!token) throw new Error("Login failed");
       //set token to local storage for now
       localStorage.setItem("token", token);
+      // Also write to cookie for Next.js middleware check
+      const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days, matches backend JWT expiresIn
+      document.cookie = `spaceshare_jwt=${token}; ` + `path=/; ` + `SameSite=Lax; ` + `expires=${expires.toUTCString()}; ` + (window.location.protocol === 'https:' ? 'Secure; ' : '');   
       return data;
     } catch(error: any){
-      const errorMessage = error.response.data.message || "Login failed";
-      console.log("error message:", errorMessage);
+      const errorMessage = error?.response?.data?.message ?? "Login failed";
       throw new Error(errorMessage);
     }
   },
 
   async forgotPassword(payload: ForgotPasswordPayload): Promise<{ success: boolean; message: string }> {
-    if (!payload.email) {
-      throw new Error("Email is required");
+    try {
+      if (!payload.email) throw new Error("Email is required");
+      await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/auth/forgot-password`, payload);
+      
+      return {
+        success: true,
+        message: `A reset link has been sent to ${payload.email}. It will expire in 15 minutes.`,
+      };
+    } catch(error: any){
+      const errorMessage = error?.response?.data?.message ?? "Request failed";
+      throw new Error(errorMessage);  
     }
-    await delay(null);
-    return {
-      success: true,
-      message: `A reset link has been sent to ${payload.email}. It will expire in 15 minutes.`,
-    };
   },
 
   async verify(){
@@ -50,18 +55,23 @@ export const authService = {
   },
 
   async resetPassword(payload: ResetPasswordPayload): Promise<{ success: boolean; message: string }> {
-    if (!payload.token || !payload.password) {
-      throw new Error("Invalid password reset request");
+    try{
+      if (!payload.code || !payload.password || !payload.email) throw new Error("Invalid password reset request");
+      await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/auth/reset-password`, payload);
+      
+      return {
+        success: true,
+        message: "Your password has been updated successfully. You can now log in.",
+      };
+    } catch(error: any){
+      const errorMessage = error?.response?.data?.message ?? "Password reset request failed";
+      throw new Error(errorMessage);  
     }
-    await delay(null);
-    return {
-      success: true,
-      message: "Your password has been updated successfully. You can now log in.",
-    };
   },
 
   async logout(): Promise<void> {
     localStorage.removeItem("token");
+    document.cookie = 'spaceshare_jwt=; path=/; SameSite=Lax; expires=Thu, 01 Jan 1970 00:00:00 GMT; ' + (window.location.protocol === 'https:' ? 'Secure; ' : '');
     await delay(null, 200);
   },
 
