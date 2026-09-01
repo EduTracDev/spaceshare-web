@@ -9,6 +9,7 @@ export const STATUS_VARIANTS = {
   ongoing: { label: "Ongoing", className: "bg-indigo-50 text-indigo-700 border-indigo-200" },
   approved: { label: "Approved", className: "bg-green-50 text-green-700 border-green-200" },
   rejected: { label: "Rejected", className: "bg-red-50 text-red-700 border-red-200" },
+  declined: { label: "Declined", className: "bg-red-50 text-red-700 border-red-200" },
   paid: { label: "Paid", className: "bg-green-50 text-green-700 border-green-200" },
   failed: { label: "Failed", className: "bg-red-50 text-red-700 border-red-200" },
   new: { label: "New", className: "bg-blue-50 text-blue-700 border-blue-200" },

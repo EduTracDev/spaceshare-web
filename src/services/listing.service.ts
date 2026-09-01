@@ -1,140 +1,146 @@
-import { MOCK_LISTINGS } from "@/mocks/listings.mock";
 import type {
   Listing,
   ListingQueryParams,
   PaginatedListings,
 } from "@/features/listings/types/listing.types";
+import { api } from "@/lib/api";
 
-const wait = (ms = 450) => new Promise((resolve) => setTimeout(resolve, ms));
-
-let listingsDb: Listing[] = JSON.parse(JSON.stringify(MOCK_LISTINGS)) as Listing[];
-
-function sortListings(
-  items: Listing[],
-  sortBy?: ListingQueryParams["sortBy"],
-  sortOrder: ListingQueryParams["sortOrder"] = "asc"
-) {
-  if (!sortBy) return items;
-
-  const factor = sortOrder === "desc" ? -1 : 1;
-
-  return [...items].sort((a, b) => {
-    const aValue = a[sortBy];
-    const bValue = b[sortBy];
-
-    if (sortBy === "submittedAt") {
-      return (new Date(String(aValue)).getTime() - new Date(String(bValue)).getTime()) * factor;
-    }
-
-    if (typeof aValue === "number" && typeof bValue === "number") {
-      return (aValue - bValue) * factor;
-    }
-
-    return String(aValue).localeCompare(String(bValue)) * factor;
-  });
+/** Extract backend error message from AxiosError shapes safely, same pattern as user.service */
+function extractErrorMessage(error: any): string {
+  if (error?.response?.data?.message && typeof error.response.data.message === "string") {
+    return error.response.data.message;
+  }
+  if (typeof error?.message === "string") return error.message;
+  return "Request failed. Please try again.";
 }
 
 export const listingService = {
+  /**
+   * GET /api/admin/listings?page=&pageSize=&search=&status=&sortBy=&sortOrder=
+   * Returns backend-paginated + filtered results (backend does search/filter/sort)
+   */
   async getListings(params: ListingQueryParams = {}): Promise<PaginatedListings> {
-    await wait();
+    try {
+      const query = new URLSearchParams();
+      if (params.page) query.set("page", String(params.page));
+      if (params.pageSize) query.set("pageSize", String(params.pageSize));
+      if (params.search?.trim()) query.set("search", params.search.trim());
+      if (params.status) query.set("status", params.status);
+      if (params.sortBy) query.set("sortBy", params.sortBy);
+      if (params.sortOrder) query.set("sortOrder", params.sortOrder);
 
-    const page = params.page ?? 1;
-    const pageSize = params.pageSize ?? 10;
-
-    let filtered = [...listingsDb];
-
-    if (params.search) {
-      const term = params.search.toLowerCase();
-      filtered = filtered.filter((listing) =>
-        [listing.spaceName, listing.host.fullName, listing.location].some((value) =>
-          value.toLowerCase().includes(term)
-        )
-      );
+      const url = `/listings${query.toString() ? `?${query.toString()}` : ""}`;
+      const response = await api.get(url);
+      const envelope = response.data;
+      const data = envelope.data ?? envelope;
+      return {
+        items: data.items ?? [],
+        total: Number(data.total ?? 0),
+        page: Number(data.page ?? params.page ?? 1),
+        pageSize: Number(data.pageSize ?? params.pageSize ?? 10),
+      };
+    } catch (error: any) {
+      throw new Error(extractErrorMessage(error));
     }
-
-    if (params.status) {
-      filtered = filtered.filter((listing) => listing.status === params.status);
-    }
-
-    filtered = sortListings(filtered, params.sortBy, params.sortOrder);
-
-    const total = filtered.length;
-    const start = (page - 1) * pageSize;
-    const items = filtered.slice(start, start + pageSize);
-
-    return {
-      items,
-      total,
-      page,
-      pageSize,
-    };
   },
 
+  /** GET /api/admin/listings/:id  individual details */
   async getListingById(id: string): Promise<Listing> {
-    await wait(250);
-    const listing = listingsDb.find((item) => item.id === id);
-
-    if (!listing) {
-      throw new Error("Listing not found");
+    if (!id) throw new Error("Listing id is required");
+    try {
+      const response = await api.get(`/listings/${id}`);
+      const envelope = response.data;
+      // Backend returns: { success, data: { listing } }
+      const listing: Listing = envelope.data?.listing ?? envelope.listing ?? envelope.data;
+      if (!listing) throw new Error("Listing not found");
+      return listing;
+    } catch (error: any) {
+      throw new Error(extractErrorMessage(error));
     }
-
-    return JSON.parse(JSON.stringify(listing)) as Listing;
   },
 
+  /** POST /api/admin/listings/:id/approve */
   async approveListing(id: string): Promise<{ message: string; listing: Listing }> {
-    await wait(500);
-    const index = listingsDb.findIndex((item) => item.id === id);
-
-    if (index < 0) {
-      throw new Error("Listing not found");
+    if (!id) throw new Error("Listing id is required");
+    try {
+      const response = await api.post(`/listings/${id}/approve`, {});
+      const envelope = response.data;
+      return {
+        message: envelope.message ?? envelope.data?.message ?? "Listing approved successfully",
+        listing: envelope.data?.listing ?? envelope.listing,
+      };
+    } catch (error: any) {
+      throw new Error(extractErrorMessage(error));
     }
-
-    listingsDb[index] = {
-      ...listingsDb[index],
-      status: "approved",
-    };
-
-    return {
-      message: "Listing approved successfully",
-      listing: JSON.parse(JSON.stringify(listingsDb[index])) as Listing,
-    };
   },
 
-  async rejectListing(id: string): Promise<{ message: string; listing: Listing }> {
-    await wait(500);
-    const index = listingsDb.findIndex((item) => item.id === id);
-
-    if (index < 0) {
-      throw new Error("Listing not found");
+  /** POST /api/admin/listings/:id/reject  (optional: { reason } in body) */
+  async rejectListing(
+    id: string,
+    opts?: { reason?: string }
+  ): Promise<{ message: string; listing: Listing }> {
+    if (!id) throw new Error("Listing id is required");
+    try {
+      const body = opts?.reason ? { reason: opts.reason } : {};
+      const response = await api.post(`/listings/${id}/reject`, body);
+      const envelope = response.data;
+      return {
+        message: envelope.message ?? envelope.data?.message ?? "Listing rejected successfully",
+        listing: envelope.data?.listing ?? envelope.listing,
+      };
+    } catch (error: any) {
+      throw new Error(extractErrorMessage(error));
     }
-
-    listingsDb[index] = {
-      ...listingsDb[index],
-      status: "rejected",
-    };
-
-    return {
-      message: "Listing rejected successfully",
-      listing: JSON.parse(JSON.stringify(listingsDb[index])) as Listing,
-    };
   },
 
+  /** POST /api/admin/listings/:id/suspend  (APPROVED -> SUSPENDED) */
   async suspendListing(id: string): Promise<{ message: string; listing: Listing }> {
-    await wait(500);
-    const index = listingsDb.findIndex((item) => item.id === id);
-
-    if (index < 0) {
-      throw new Error("Listing not found");
+    if (!id) throw new Error("Listing id is required");
+    try {
+      const response = await api.post(`/listings/${id}/suspend`, {});
+      const envelope = response.data;
+      return {
+        message: envelope.message ?? envelope.data?.message ?? "Listing suspended successfully",
+        listing: envelope.data?.listing ?? envelope.listing,
+      };
+    } catch (error: any) {
+      throw new Error(extractErrorMessage(error));
     }
+  },
 
-    listingsDb[index] = {
-      ...listingsDb[index],
-      status: "suspended",
-    };
+  /** POST /api/admin/listings/:id/reactivate  (SUSPENDED -> APPROVED) */
+  async reactivateListing(id: string): Promise<{ message: string; listing: Listing }> {
+    if (!id) throw new Error("Listing id is required");
+    try {
+      const response = await api.post(`/listings/${id}/reactivate`, {});
+      const envelope = response.data;
+      return {
+        message:
+          envelope.message ?? envelope.data?.message ?? "Listing reactivated successfully",
+        listing: envelope.data?.listing ?? envelope.listing,
+      };
+    } catch (error: any) {
+      throw new Error(extractErrorMessage(error));
+    }
+  },
 
-    return {
-      message: "Listing suspended successfully",
-      listing: JSON.parse(JSON.stringify(listingsDb[index])) as Listing,
-    };
+  /**
+   * DELETE /api/admin/reported-reviews/:reviewId
+   * Direct admin delete action for the Trash2 button in ListingReviewsPanel.
+   * Removes any single review from a listing (sets visibility=REMOVED on the
+   * underlying DB row). No report required — direct moderation action.
+   */
+  async deleteReview(reviewId: string): Promise<{ message: string }> {
+    if (!reviewId) throw new Error("Review id is required");
+    try {
+      const response = await api.delete(`/reported-reviews/${reviewId}`);
+      const envelope = response.data;
+      return {
+        message:
+          envelope.message ?? envelope.data?.message ?? "Review deleted successfully",
+      };
+    } catch (error: any) {
+      throw new Error(extractErrorMessage(error));
+    }
   },
 };

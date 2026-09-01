@@ -62,12 +62,24 @@ export function UserManagementTable({
 }: UserManagementTableProps) {
   const [role, setRole] = React.useState<UserRoleTab>("host");
   const [search, setSearch] = React.useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = React.useState<string>("");
   const [status, setStatus] = React.useState<StatusFilter>("all");
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [pagination, setPagination] = React.useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   });
+
+  // Debounce search: only commit to `debouncedSearch` 250ms after the user stops typing.
+  // Mirrors the existing pattern in AuditLogsManagementTable.tsx for consistency.
+  // Without this, every keystroke triggers a full backend fetch (wasted calls).
+  React.useEffect(() => {
+    const t = window.setTimeout(() => {
+      setDebouncedSearch(search);
+      setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+    }, 250);
+    return () => window.clearTimeout(t);
+  }, [search]);
 
   const actions: UserRowActions = { onViewDetails, onSuspend, onReactivate };
 
@@ -81,7 +93,7 @@ export function UserManagementTable({
     queryKey: [
       "users",
       role,
-      search,
+      debouncedSearch,
       status,
       pagination.pageIndex + 1,
       pagination.pageSize,
@@ -90,7 +102,7 @@ export function UserManagementTable({
     queryFn: () =>
       userService.getUsers({
         role,
-        search: search || undefined,
+        search: debouncedSearch || undefined,
         status: status === "all" ? undefined : status,
         page: pagination.pageIndex + 1,
         pageSize: pagination.pageSize,
@@ -140,7 +152,8 @@ export function UserManagementTable({
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
-                  setPagination((p) => ({ ...p, pageIndex: 0 }));
+                  // Pagination reset moved into debounce effect above — fires only when
+                  // debouncedSearch commits (avoids spamming pageIndex=0 on every key)
                 }}
                 placeholder="Search by email or name…"
                 className="h-11 rounded-xl border-border pl-10 pr-3 text-[13px] bg-muted/30 placeholder:text-muted-foreground/70 focus-visible:bg-background"
@@ -206,7 +219,7 @@ export function UserManagementTable({
           sorting={sorting}
           onSortingChange={setSorting}
           onRowClick={(user) => onViewDetails(user)}
-          searchTerm={search || undefined}
+          searchTerm={debouncedSearch || undefined}
           emptyTitle="No Users Found"
           emptyDescription="There are currently no users matching your search or filter criteria. Try adjusting your filters or check back later as new users join the platform."
           tableClassName="px-2 sm:px-3"

@@ -77,7 +77,7 @@ export function TransactionManagementTable({ onViewDetails }: TransactionManagem
           | "bookingNumber"
           | "hostName"
           | "eventDate"
-          | "amountPaid"
+          | "amount"
           | "commission"
           | "netPayout"
           | "status"

@@ -1,131 +1,121 @@
-import { MOCK_BOOKINGS, MOCK_SKYLINE_PAVILION_BOOKING } from "@/mocks/bookings.mock";
+// c:\Users\user\Projects\Curr Proj\SPACE_SHARE-ADM\spaceshare-web\src\services\booking.service.ts
 import type {
   Booking,
   BookingQueryParams,
   PaginatedBookings,
 } from "@/features/bookings/types/booking.types";
+import { api } from "@/lib/api";
 
-const wait = (ms = 450) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const bookingsDb: Booking[] = JSON.parse(JSON.stringify(MOCK_BOOKINGS)) as Booking[];
-
-function sortBookings(
-  items: Booking[],
-  sortBy?: BookingQueryParams["sortBy"],
-  sortOrder: BookingQueryParams["sortOrder"] = "asc"
-) {
-  if (!sortBy) return items;
-
-  const factor = sortOrder === "desc" ? -1 : 1;
-
-  return [...items].sort((a, b) => {
-    if (sortBy === "guestName") {
-      return a.guest.fullName.localeCompare(b.guest.fullName) * factor;
-    }
-
-    if (sortBy === "hostName") {
-      return a.host.fullName.localeCompare(b.host.fullName) * factor;
-    }
-
-    if (sortBy === "eventDate") {
-      return (new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime()) * factor;
-    }
-
-    if (sortBy === "amount") {
-      return (a.amount - b.amount) * factor;
-    }
-
-    if (sortBy === "bookingNumber") {
-      return a.bookingNumber.localeCompare(b.bookingNumber) * factor;
-    }
-
-    if (sortBy === "spaceName") {
-      return a.spaceName.localeCompare(b.spaceName) * factor;
-    }
-
-    if (sortBy === "status") {
-      return a.status.localeCompare(b.status) * factor;
-    }
-
-    return 0;
-  });
+/**
+ * User-friendly error extraction for Axios errors.
+ * Prevents showing generic Axios text "Request failed with status code 401"
+ * when the backend actually returned a specific message like "Only pending bookings can be approved".
+ *
+ * Fallback tiers:
+ * 1. Backend JSON response.data.message (what you threw in CustomErrors)
+ * 2. Backend JSON response.data.error (fallback envelope format)
+ * 3. Axios native err.message (Network Error / CORS / etc.)
+ * 4. Static "Request failed..." text
+ */
+function extractErrorMessage(error: unknown): string {
+  if (!error) return "Something went wrong. Please try again.";
+  const err = error as Record<string, any>;
+  const candidate: unknown =
+    err?.response?.data?.message ??
+    err?.response?.data?.error ??
+    err?.message;
+  if (typeof candidate === "string" && candidate.trim().length > 0) {
+    return candidate.trim();
+  }
+  return "Request failed. Please try again.";
 }
 
 export const bookingService = {
+  /**
+   * GET /api/admin/bookings
+   * Backend does: pagination, status filter, search (space/host/guest names/emails),
+   * sort (7 sortable columns), disputed virtual status, accurate total count.
+   *
+   * Backend envelope: { success: true, data: { items, total, page, pageSize } }
+   */
   async getBookings(params: BookingQueryParams = {}): Promise<PaginatedBookings> {
-    await wait();
+    try {
+      const response = await api.get("/bookings", {
+        params: {
+          page: params.page ?? 1,
+          pageSize: params.pageSize ?? 10,
+          ...(params.status ? { status: params.status } : {}),
+          ...(params.search ? { search: params.search } : {}),
+          ...(params.sortBy ? { sortBy: params.sortBy } : {}),
+          ...(params.sortOrder ? { sortOrder: params.sortOrder } : {}),
+        },
+      });
 
-    const page = params.page ?? 1;
-    const pageSize = params.pageSize ?? 10;
+      const envelope = response?.data?.data as PaginatedBookings | undefined;
 
-    let filtered = [...bookingsDb];
-
-    if (params.search) {
-      const term = params.search.toLowerCase();
-      filtered = filtered.filter((booking) =>
-        [
-          booking.bookingNumber,
-          booking.guest.fullName,
-          booking.host.fullName,
-          booking.spaceName,
-        ].some((value) => value.toLowerCase().includes(term))
-      );
-    }
-
-    if (params.status) {
-      filtered = filtered.filter((booking) => booking.status === params.status);
-    }
-
-    filtered = sortBookings(filtered, params.sortBy, params.sortOrder);
-
-    const total = filtered.length;
-    const start = (page - 1) * pageSize;
-    const items = filtered.slice(start, start + pageSize);
-
-    return {
-      items,
-      total,
-      page,
-      pageSize,
-    };
-  },
-
-  async getBookingById(id: string): Promise<Booking> {
-    await wait(250);
-
-    if (id === MOCK_SKYLINE_PAVILION_BOOKING.id) {
-      return JSON.parse(JSON.stringify(MOCK_SKYLINE_PAVILION_BOOKING)) as Booking;
-    }
-
-    const booking = bookingsDb.find((item) => item.id === id);
-    if (!booking) {
-      throw new Error("Booking not found");
-    }
-
-    return JSON.parse(JSON.stringify(booking)) as Booking;
-  },
-
-  async updateBookingStatus(id: string, nextStatus: Booking["status"]) {
-    await wait(500);
-
-    const index = bookingsDb.findIndex((item) => item.id === id);
-    const skylineIndex = id === MOCK_SKYLINE_PAVILION_BOOKING.id ? -1 : index;
-
-    if (index < 0 && skylineIndex < 0) {
-      throw new Error("Booking not found");
-    }
-
-    if (index >= 0) {
-      bookingsDb[index] = {
-        ...bookingsDb[index],
-        status: nextStatus,
+      if (!envelope || !Array.isArray(envelope.items)) {
+        const direct = (response?.data ?? {}) as PaginatedBookings;
+        if (direct && Array.isArray(direct.items)) {
+          return {
+            items: direct.items,
+            total: typeof direct.total === "number" ? direct.total : 0,
+            page: typeof direct.page === "number" ? direct.page : params.page ?? 1,
+            pageSize:
+              typeof direct.pageSize === "number"
+                ? direct.pageSize
+                : params.pageSize ?? 10,
+          };
+        }
+        return {
+          items: [],
+          total: 0,
+          page: params.page ?? 1,
+          pageSize: params.pageSize ?? 10,
+        };
+      }
+      return {
+        items: envelope.items,
+        total: typeof envelope.total === "number" ? envelope.total : 0,
+        page: typeof envelope.page === "number" ? envelope.page : params.page ?? 1,
+        pageSize:
+          typeof envelope.pageSize === "number"
+            ? envelope.pageSize
+            : params.pageSize ?? 10,
       };
+    } catch (error) {
+      throw new Error(extractErrorMessage(error));
     }
+  },
 
-    const statusLabel = nextStatus[0].toUpperCase() + nextStatus.slice(1);
+  /**
+   * GET /api/admin/bookings/:id
+   * Full booking details for the right-side details sheet/drawer.
+   *
+   * Path is relative `/bookings/:id` because the api axios instance already
+   * sets NEXT_PUBLIC_SERVER_URL = /api/admin as its baseURL.
+   * DO NOT prefix with `/admin/` — that would produce `/api/admin/admin/bookings/:id`.
+   */
+  async getBookingById(id: string): Promise<Booking> {
+    try {
+      const response = await api.get(`/bookings/${id}`);
+      const booking = response?.data?.data as Booking | undefined;
+      if (!booking || !booking.id) throw new Error("Booking not found");
+      return booking;
+    } catch (error) {
+      throw new Error(extractErrorMessage(error));
+    }
+  },
 
-    return {
-      message: `Booking ${statusLabel} successfully`,
-    };
+  /**
+   * Intentionally left as a descriptive stub. Status-transition endpoints
+   * (approve/reject/cancel/complete/dispute booking actions) can be added later.
+   *
+   * Throwing an explicit user-visible error NOW avoids the silent-failure bug
+   * where the UI button click "does nothing" and the user has no idea why.
+   */
+  async updateBookingStatus(_id: string, _nextStatus: Booking["status"]) {
+    throw new Error(
+      "Booking status updates are not yet enabled. Please check back shortly."
+    );
   },
 };

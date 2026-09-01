@@ -1,5 +1,11 @@
 import type { TrendTone } from "@/components/shared/StatsCard";
 
+export interface Dashboard {
+  summary: DashboardSummary,
+  userGrowth: GrowthPoint[],
+  bookingsTrend: BookingsPoint[],
+}
+
 export interface DashboardSummary {
   totalUsers: {
     value: number;
@@ -26,12 +32,12 @@ export interface DashboardSummary {
 export type SeriesLabel = "Host" | "Guest";
 
 export interface GrowthPoint {
-  month: string;        // e.g. "Jan", "Feb", …
+  month: string;
   Host: number;
   Guest: number;
 }
 
 export interface BookingsPoint {
-  month: string;       // e.g. "Jan", "Feb", …
+  month: string;
   bookings: number;
 }

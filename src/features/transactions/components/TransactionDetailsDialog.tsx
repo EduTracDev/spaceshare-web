@@ -150,13 +150,87 @@ export function TransactionDetailsSheet({
 
           {/* 2) Heading + summary block (BELOW top close button row — so there's space at top before content) */}
           <div className="px-6 sm:px-7 pt-4 pb-3">
+            {/* Dialog SUBJECT = ACTUAL RECIPIENT (matches Figma):
+                 PAYOUT → Host (they get paid) 
+                 REFUND → Guest (they get refund back, as in Figma Cancelled screenshot recipient = GUEST)
+                 PAYMENT → Host (booking contextual identity)
+            */}
             <div className="flex flex-wrap items-center gap-2 text-[13px] text-muted-foreground">
-              <span className="font-semibold text-foreground">{transaction.host.fullName}</span>
+              <span className="font-semibold text-foreground">
+                {transaction.type === "refund" && transaction.guest ? transaction.guest.fullName : transaction.host.fullName}
+              </span>
               <span>•</span>
               <span>{transaction.spaceName}</span>
               <span>•</span>
-              <span>{transaction.payoutNumber}</span>
+              <span>{transaction.transactionNumber}</span>
             </div>
+
+            {/* Cancelled / Refund flow: Inject Cancellation Summary directly under header
+                 (matches Figma Cancelled screenshot layout) */}
+            {transaction.type === "refund" && transaction.cancellation ? (
+              <div className="mt-4 space-y-2.5 rounded-2xl border border-border/60 bg-white px-4 py-3.5">
+                <InfoRow
+                  label="Cancelled by"
+                  value={
+                    <span className="text-[13px] font-semibold text-foreground/90">
+                      {transaction.cancellation.byName}
+                      {(() => {
+                        const role = transaction.cancellation.byRole;
+                        if (role === "HOST") {
+                          return (
+                            <span className="ml-2 inline-flex rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                              Host
+                            </span>
+                          );
+                        }
+                        if (role === "GUEST") {
+                          return (
+                            <span className="ml-2 inline-flex rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
+                              Guest
+                            </span>
+                          );
+                        }
+                        return null;
+                      })()}
+                    </span>
+                  }
+                />
+                <InfoRow
+                  label="Cancellation Time"
+                  value={
+                    <span className="text-[13px] font-medium text-foreground/90">
+                      {formatDateTime(transaction.cancellation.timestamp)}
+                    </span>
+                  }
+                />
+                <div className="pt-1">
+                  <div className="text-[12px] font-medium text-muted-foreground mb-1.5">
+                    Cancellation Reason
+                  </div>
+                  <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-[12px] leading-5 text-red-700">
+                    {transaction.cancellation.reason}
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
+            {/* ✨ ELIGIBILITY BANNER only on Payout + Completed pending */}
+            {transaction.type === "payout" && transaction.status === "completed" ? (
+              <div className="mt-3 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                  <BadgeCheck size={14} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[12.5px] font-bold uppercase tracking-tight text-emerald-900">
+                    Action Required — Ready to Pay
+                  </div>
+                  <div className="mt-0.5 text-[12px] leading-5 text-emerald-800/80">
+                    Event has been completed. Both the host payout and guest caution refund can be processed.
+                    Scroll down and click <strong>Mark as Paid</strong> to release funds.
+                  </div>
+                </div>
+              </div>
+            ) : null}
 
             <div className="mt-3 rounded-2xl border border-border/60 px-4 py-3.5">
               <div className="flex items-center justify-between gap-4">
@@ -166,7 +240,7 @@ export function TransactionDetailsSheet({
                     Amount
                   </div>
                   <div className="mt-1 text-[18px] font-bold tracking-tight text-foreground">
-                    {formatCurrency(transaction.amountPaid)}
+                    {formatCurrency(transaction.amount)}
                   </div>
                 </div>
                 <StatusBadge status={TRANSACTION_STATUS_KEYS[transaction.status]} size="sm" />
@@ -178,7 +252,7 @@ export function TransactionDetailsSheet({
                 label="Payment Date"
                 value={
                   <span className="text-[13px] font-medium text-foreground/90">
-                    {formatDateTime(transaction.paymentDate)}
+                    {formatDateTime(transaction.transactionDate)}
                   </span>
                 }
               />
@@ -194,42 +268,101 @@ export function TransactionDetailsSheet({
           </div>
 
           <div className="flex-1 overflow-y-auto px-6 sm:px-7 pb-4 overscroll-contain scrollbar-gutter-stable">
-            <Card className="rounded-2xl border-border/60 shadow-none">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <UserAvatar
-                    name={transaction.host.fullName}
-                    imageUrl={transaction.host.avatarUrl}
-                    size="lg"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[13.5px] font-semibold text-foreground">
-                        {transaction.host.fullName}
-                      </span>
-                      <span className="inline-flex rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                        Host
-                      </span>
-                    </div>
-                    <div className="mt-0.5 truncate text-[12px] text-muted-foreground">
-                      {transaction.host.email}
+            {/* ===========================================
+               BANK RECIPIENT CARDS — vary by transaction TYPE:
+               REFUND → ONLY Guest (money going to Guest per Figma)
+               PAYOUT → Host + Guest BOTH (dual payout hybrid plan)
+               PAYMENT → Both (contextual info only)
+               =========================================== */}
+
+            {/* REFUND TYPE: Only the GUEST bank card (Host gets N0 — as in Figma Cancelled screenshot shows only recipient = GUEST) */}
+            {transaction.type === "refund" && transaction.guest ? (
+              <Card className="rounded-2xl border-border/60 shadow-none">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <UserAvatar
+                      name={transaction.guest.fullName}
+                      imageUrl={transaction.guest.avatarUrl}
+                      size="lg"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[13.5px] font-semibold text-foreground">
+                          {transaction.guest.fullName}
+                        </span>
+                        <span className="inline-flex rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
+                          Guest
+                        </span>
+                      </div>
+                      <div className="mt-0.5 truncate text-[12px] text-muted-foreground">
+                        {transaction.guest.email}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="mt-4 border-t border-border/50 text-[13px]">
-                  <InfoRow label="Bank Name" value={transaction.host.bankName} />
-                  <InfoRow
-                    label="Account Number"
-                    value={transaction.host.accountNumber}
-                    rightSlot={<CopyableValue value={transaction.host.accountNumber} />}
-                  />
-                  <InfoRow label="Account Name" value={transaction.host.accountName} />
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="mt-4 border-t border-border/50 text-[13px]">
+                    <InfoRow
+                      label="Bank Name"
+                      value={transaction.guest.bankName || "—"}
+                    />
+                    <InfoRow
+                      label="Account Number"
+                      value={transaction.guest.accountNumber || "—"}
+                      rightSlot={
+                        transaction.guest.accountNumber ? (
+                          <CopyableValue value={transaction.guest.accountNumber} />
+                        ) : undefined
+                      }
+                    />
+                    <InfoRow
+                      label="Account Name"
+                      value={transaction.guest.accountName || "—"}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            ) : null}
 
-            {transaction.status === "success" && transaction.guest ? (
+            {/* NON-REFUND (Payout, Payment): Show HOST card always */}
+            {transaction.type !== "refund" ? (
+              <Card className="rounded-2xl border-border/60 shadow-none">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <UserAvatar
+                      name={transaction.host.fullName}
+                      imageUrl={transaction.host.avatarUrl}
+                      size="lg"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[13.5px] font-semibold text-foreground">
+                          {transaction.host.fullName}
+                        </span>
+                        <span className="inline-flex rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                          Host
+                        </span>
+                      </div>
+                      <div className="mt-0.5 truncate text-[12px] text-muted-foreground">
+                        {transaction.host.email}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 border-t border-border/50 text-[13px]">
+                    <InfoRow label="Bank Name" value={transaction.host.bankName} />
+                    <InfoRow
+                      label="Account Number"
+                      value={transaction.host.accountNumber}
+                      rightSlot={<CopyableValue value={transaction.host.accountNumber} />}
+                    />
+                    <InfoRow label="Account Name" value={transaction.host.accountName} />
+                  </div>
+                </CardContent>
+              </Card>
+            ) : null}
+
+            {/* NON-REFUND (Payout, Payment): Show GUEST card if Guest info exists */}
+            {transaction.type !== "refund" && transaction.guest ? (
               <Card className="mt-4 rounded-2xl border-border/60 shadow-none">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
@@ -254,199 +387,97 @@ export function TransactionDetailsSheet({
                   </div>
 
                   <div className="mt-4 border-t border-border/50 text-[13px]">
-                    <InfoRow label="Bank Name" value="GTBank" />
+                    <InfoRow
+                      label="Bank Name"
+                      value={transaction.guest.bankName || "—"}
+                    />
                     <InfoRow
                       label="Account Number"
-                      value="01234456789"
-                      rightSlot={<CopyableValue value="01234456789" />}
-                    />
-                    <InfoRow label="Account Name" value="Abdul Mike" />
-                  </div>
-                </CardContent>
-              </Card>
-            ) : null}
-
-            {transaction.status === "cancelled" && transaction.cancellation ? (
-              <Card className="mt-4 rounded-2xl border-border/60 shadow-none">
-                <CardContent className="p-4 space-y-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <div className="text-[11px] font-medium text-muted-foreground">
-                        Cancelled by
-                      </div>
-                      <div className="mt-1 flex items-center gap-2">
-                        <UserAvatar
-                          name={transaction.cancellation.byName}
-                          size="sm"
-                        />
-                        <div>
-                          <div className="text-[13px] font-semibold text-foreground">
-                            {transaction.cancellation.byName}
-                          </div>
-                          <div className="text-[12px] text-muted-foreground">
-                            {transaction.cancellation.byEmail}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <Badge className="rounded-full bg-blue-50 text-blue-700 border-blue-200">
-                      Guest
-                    </Badge>
-                  </div>
-
-                  <div className="border-t border-border/50 text-[13px]">
-                    <InfoRow
-                      label="Cancellation Time"
-                      value={
-                        <span className="text-[13px] font-medium text-foreground/90">
-                          {formatDateTime(transaction.cancellation.timestamp)}
-                        </span>
+                      value={transaction.guest.accountNumber || "—"}
+                      rightSlot={
+                        transaction.guest.accountNumber ? (
+                          <CopyableValue value={transaction.guest.accountNumber} />
+                        ) : undefined
                       }
                     />
-                    <div className="py-2.5">
-                      <div className="text-[12px] font-medium text-muted-foreground">
-                        Cancellation Reason
-                      </div>
-                      <div className="mt-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-[12px] leading-5 text-red-700">
-                        {transaction.cancellation.reason}
-                      </div>
-                    </div>
-                  </div>
-
-                  {transaction.refund ? (
-                    <div className="border-t border-border/50 text-[13px]">
-                      <InfoRow
-                        label="Host Payout"
-                        value={formatCurrency(transaction.refund.hostPayoutAmount)}
-                      />
-                      <InfoRow
-                        label="Refund Amount"
-                        value={formatCurrency(transaction.refund.refundAmount)}
-                      />
-                    </div>
-                  ) : null}
-                </CardContent>
-              </Card>
-            ) : null}
-
-            {transaction.status === "success" ? (
-              <Card className="mt-4 rounded-2xl border-border/60 shadow-none">
-                <CardContent className="p-4 space-y-4">
-                  {transaction.guest ? (
-                    <div className="flex items-center gap-3">
-                      <UserAvatar
-                        name={transaction.guest.fullName}
-                        imageUrl={transaction.guest.avatarUrl}
-                        size="lg"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[13.5px] font-semibold text-foreground">
-                            {transaction.guest.fullName}
-                          </span>
-                          <span className="inline-flex rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
-                            Guest
-                          </span>
-                        </div>
-                        <div className="mt-0.5 truncate text-[12px] text-muted-foreground">
-                          {transaction.guest.email}
-                        </div>
-                      </div>
-                    </div>
-                  ) : null}
-
-                  <div className="grid grid-cols-2 gap-3 text-[13px]">
-                    <div className="rounded-xl border border-border/60 px-4 py-3">
-                      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                        <UserRound size={12} />
-                        Net Payout Host
-                      </div>
-                      <div className="mt-1.5 font-semibold text-foreground">
-                        {formatCurrency(transaction.payout.netPayoutHost)}
-                      </div>
-                    </div>
-                    <div className="rounded-xl border border-border/60 px-4 py-3">
-                      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                        <Clock size={12} />
-                        Refundable Caution Fee
-                      </div>
-                      <div className="mt-1.5 font-semibold text-foreground">
-                        {formatCurrency(transaction.payout.refundableCautionFee)}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : null}
-
-            {transaction.status === "paid" ? (
-              <Card className="mt-4 rounded-2xl border-border/60 shadow-none">
-                <CardContent className="p-4 space-y-4">
-                  {transaction.guest ? (
-                    <div className="flex items-center gap-3">
-                      <UserAvatar
-                        name={transaction.guest.fullName}
-                        imageUrl={transaction.guest.avatarUrl}
-                        size="lg"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[13.5px] font-semibold text-foreground">
-                            {transaction.guest.fullName}
-                          </span>
-                          <span className="inline-flex rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
-                            Guest
-                          </span>
-                        </div>
-                        <div className="mt-0.5 truncate text-[12px] text-muted-foreground">
-                          {transaction.guest.email}
-                        </div>
-                      </div>
-                    </div>
-                  ) : null}
-
-                  <div className="rounded-xl border border-border/60 px-4 py-3 text-[13px]">
                     <InfoRow
-                      label="Refundable Caution Fee"
-                      value={formatCurrency(transaction.payout.refundableCautionFee)}
+                      label="Account Name"
+                      value={transaction.guest.accountName || "—"}
                     />
                   </div>
                 </CardContent>
               </Card>
             ) : null}
 
-            <Card className="mt-4 rounded-2xl border-border/60 shadow-none">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 text-[13px] font-semibold text-foreground">
-                  <Wallet size={15} />
-                  <span>Payment Breakdown</span>
-                </div>
-                <div className="mt-2 text-[13px]">
-                  <BreakdownLine
-                    label="Gross booking amount"
-                    amount={transaction.payout.grossBookingAmount}
-                  />
-                  <BreakdownLine
-                    label="Platform Commission (10%)"
-                    amount={transaction.payout.platformCommission}
-                    isNegative
-                  />
-                  <BreakdownLine
-                    label="Refundable Caution Fee"
-                    amount={transaction.payout.refundableCautionFee}
-                  />
-                  <BreakdownLine
-                    label="Net Payout Host"
-                    amount={transaction.payout.netPayoutHost}
-                    isTotal
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            {/* =============== BREAKDOWN / SUMMARY CARDS =============== */}
+
+            {/* REFUND: Use FIGMA simple 2-field card, NOT generic Payment Breakdown */}
+            {transaction.type === "refund" && transaction.refund ? (
+              <Card className="mt-4 rounded-2xl border-border/60 shadow-none">
+                <CardContent className="p-4 space-y-1.5">
+                  <div className="flex items-center justify-between py-2.5 text-[13px]">
+                    <span className="font-medium text-foreground/85">Host Payout</span>
+                    <span className="font-semibold text-foreground/90">N0</span>
+                  </div>
+                  <div className="flex items-center justify-between border-t border-border/50 pt-2.5 text-[13px]">
+                    <span className="font-medium text-foreground/85">Refund Amount</span>
+                    <span className="text-[15px] font-bold tracking-tight text-foreground">
+                      {formatCurrency(transaction.refund.refundAmount)}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : null}
+
+            {/* Payment Breakdown = only for NON-refund (Payout/Payment) types */}
+            {transaction.type !== "refund" ? (
+              <Card className="mt-4 rounded-2xl border-border/60 shadow-none">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 text-[13px] font-semibold text-foreground">
+                    <Wallet size={15} />
+                    <span>Payment Breakdown</span>
+                  </div>
+                  <div className="mt-2 text-[13px]">
+                    <BreakdownLine
+                      label="Gross booking amount"
+                      amount={transaction.breakdown.grossBookingAmount}
+                    />
+                    {(() => {
+                      const gross = Math.max(1, Number(transaction.breakdown.grossBookingAmount));
+                      const pct = Math.round(
+                        (Number(transaction.breakdown.platformCommission) / gross) * 100
+                      );
+                      return (
+                        <BreakdownLine
+                          label={`Platform Commission (${pct}%)`}
+                          amount={transaction.breakdown.platformCommission}
+                          isNegative
+                        />
+                      );
+                    })()}
+                    <BreakdownLine
+                      label="Refundable Caution Fee (Guest refund)"
+                      amount={transaction.breakdown.refundableCautionFee}
+                      isNegative
+                    />
+                    <BreakdownLine
+                      label="Net Payout Host"
+                      amount={transaction.breakdown.netPayoutHost}
+                      isTotal
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            ) : null}
           </div>
 
           <div className="border-t border-border/60 bg-muted/20 px-6 py-4">
-            {transaction.status === "pending" ? (
+            {/* IRONCLAD RULE: Mark As Paid button ONLY shows if:
+               1. transaction.type = PAYOUT
+               2. derived frontend status = "completed" (event done, booking COMPLETED, payout pending in DB)
+               Showing button on status=pending rows would allow paying out BEFORE event = audit violation.
+            */}
+            {transaction.type === "payout" && transaction.status === "completed" ? (
               <div className="flex items-center justify-end">
                 <Button
                   type="button"
@@ -458,7 +489,7 @@ export function TransactionDetailsSheet({
                   {actionLoading === "markPaid" ? "Marking as Paid..." : "Mark as Paid"}
                 </Button>
               </div>
-            ) : transaction.status === "cancelled" ? (
+            ) : transaction.type === "refund" && transaction.status === "cancelled" ? (
               <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center sm:justify-end">
                 {transaction.refund ? (
                   <div className="flex flex-col items-end gap-0.5 text-[12px] text-foreground/80">

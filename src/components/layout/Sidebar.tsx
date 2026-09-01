@@ -72,7 +72,7 @@ export function Sidebar() {
   );
 
   const handleLogoutClick = React.useCallback(() => {
-    // TODO: wire real auth service logout() here once Nest backend swap happens.
+        
     setMobileOpen(false);
     router.replace("/login");
   }, [router]);
@@ -152,7 +152,7 @@ export function Sidebar() {
       <div className="p-3 pt-2 border-t border-sidebar-border">
         <button
           type="button"
-          onClick={handleLogoutClick}
+          onClick={handleLogoutClick}   
           className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
         >
           <LogoutIcon size={17} className="shrink-0" />

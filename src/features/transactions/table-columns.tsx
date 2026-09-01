@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+
 import type { ColumnDef } from "@tanstack/react-table";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import type { Transaction } from "@/features/transactions/types/transaction.types";
@@ -52,12 +52,12 @@ export function buildTransactionColumns(
       ),
     },
     {
-      accessorKey: "amountPaid",
-      header: "Amount Paid",
+      accessorKey: "amount",
+      header: "Amount",
       enableSorting: true,
       cell: ({ row }) => (
         <span className="text-[13px] font-medium text-foreground/90">
-          {formatCurrency(row.original.amountPaid)}
+          {formatCurrency(row.original.amount)}
         </span>
       ),
     },

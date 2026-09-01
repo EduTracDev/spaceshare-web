@@ -176,7 +176,7 @@ export default function TransactionsPage() {
             label="Net Payout"
             valueRight={
               <span className="text-[16px] font-bold tracking-tight text-foreground">
-                {selectedTransaction ? formatCurrency(selectedTransaction.payout.netPayoutHost) : "—"}
+                {selectedTransaction ? formatCurrency(selectedTransaction.breakdown.netPayoutHost) : "—"}
               </span>
             }
           />

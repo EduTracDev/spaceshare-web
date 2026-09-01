@@ -5,6 +5,7 @@ import {
   NotificationDrawerProvider,
   MobileBell,
 } from "@/features/notifications/providers/NotificationDrawerProvider";
+import { ProtectedRoute } from "@/features/auth/components/ProtectedRoute";
 
 export const metadata: Metadata = {
   title: { default: "Dashboard", template: "%s | SpaceShare Admin" },
@@ -62,7 +63,7 @@ export default function DashboardLayout({
         </div>
 
           <PageContainer paddingY="md">
-            {children}
+            <ProtectedRoute>{children}</ProtectedRoute>
           </PageContainer>
         </main>
       </NotificationDrawerProvider>

@@ -1,98 +1,60 @@
-import { MOCK_AUDIT_LOGS } from "@/mocks/audit-logs.mock";
 import type {
-  AuditLog,
-  AuditLogQueryParams,
   PaginatedAuditLogs,
+  AuditLogQueryParams,
 } from "@/features/audit-logs/types/audit-log.types";
+import { api } from "@/lib/api";
 
-const wait = (ms = 450) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const logsDb: AuditLog[] = JSON.parse(
-  JSON.stringify(MOCK_AUDIT_LOGS)
-) as AuditLog[];
-
-function sortLogs(
-  items: AuditLog[],
-  sortBy?: AuditLogQueryParams["sortBy"],
-  sortOrder: AuditLogQueryParams["sortOrder"] = "desc"
-) {
-  const factor = sortOrder === "desc" ? -1 : 1;
-
-  if (!sortBy) {
-    return [...items].sort(
-      (a, b) =>
-        (new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()) *
-        factor
-    );
+/**
+ * Extracts user-friendly backend error message from Axios errors.
+ * Falls back progressively: server JSON message → Axios generic → safe default.
+ * Mirrors the pattern used in user.service.ts / listing.service.ts for consistency.
+ */
+function extractErrorMessage(error: any): string {
+  if (error?.response?.data?.message && typeof error.response.data.message === "string") {
+    return error.response.data.message;
   }
-
-  return [...items].sort((a, b) => {
-    if (sortBy === "actorName") {
-      return a.actor.fullName.localeCompare(b.actor.fullName) * factor;
-    }
-
-    if (sortBy === "timestamp") {
-      return (
-        (new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()) *
-        factor
-      );
-    }
-
-    const valueA = a[sortBy as "action" | "description"];
-    const valueB = b[sortBy as "action" | "description"];
-
-    return String(valueA).localeCompare(String(valueB)) * factor;
-  });
+  if (typeof error?.message === "string") return error.message;
+  return "Request failed. Please try again.";
 }
 
 export const auditLogService = {
+  /**
+   * GET /api/admin/audit-logs
+   * Backend performs all: pagination, search, date-range filtering, sorting.
+   *
+   * Query params sent:
+   *   page, pageSize, search,
+   *   dateRangeStart, dateRangeEnd (flat query-string friendly),
+   *   sortBy, sortOrder
+   *
+   * Backend envelope: { success, message, data: { items, total, page, pageSize } }
+   */
   async getAuditLogs(
     params: AuditLogQueryParams = {}
   ): Promise<PaginatedAuditLogs> {
-    await wait();
+    try {
+      const query = new URLSearchParams();
+      if (params.page) query.set("page", String(params.page));
+      if (params.pageSize) query.set("pageSize", String(params.pageSize));
+      if (params.search?.trim()) query.set("search", params.search.trim());
+      if (params.dateRange?.start) query.set("dateRangeStart", params.dateRange.start);
+      if (params.dateRange?.end) query.set("dateRangeEnd", params.dateRange.end);
+      if (params.sortBy) query.set("sortBy", params.sortBy);
+      if (params.sortOrder) query.set("sortOrder", params.sortOrder);
 
-    const page = params.page ?? 1;
-    const pageSize = params.pageSize ?? 10;
+      const url = `/audit-logs${query.toString() ? `?${query.toString()}` : ""}`;
+      const response = await api.get(url);
+      const envelope = response.data;
+      const payload: PaginatedAuditLogs = envelope.data ?? envelope;
 
-    let filtered = [...logsDb];
-
-    if (params.search) {
-      const term = params.search.toLowerCase();
-      filtered = filtered.filter((log) =>
-        [
-          log.actor.fullName,
-          log.actor.email,
-          log.action,
-          log.description,
-        ].some((value) => value.toLowerCase().includes(term))
-      );
+      return {
+        items: payload.items ?? [],
+        total: Number(payload.total ?? 0),
+        page: Number(payload.page ?? params.page ?? 1),
+        pageSize: Number(payload.pageSize ?? params.pageSize ?? 10),
+      };
+    } catch (error: any) {
+      throw new Error(extractErrorMessage(error));
     }
-
-    if (params.dateRange?.start || params.dateRange?.end) {
-      const start = params.dateRange.start
-        ? new Date(params.dateRange.start).getTime()
-        : Number.NEGATIVE_INFINITY;
-      const end = params.dateRange.end
-        ? new Date(params.dateRange.end).getTime() + 86_399_999
-        : Number.POSITIVE_INFINITY;
-
-      filtered = filtered.filter((log) => {
-        const ts = new Date(log.timestamp).getTime();
-        return ts >= start && ts <= end;
-      });
-    }
-
-    filtered = sortLogs(filtered, params.sortBy, params.sortOrder);
-
-    const total = filtered.length;
-    const start = (page - 1) * pageSize;
-    const items = filtered.slice(start, start + pageSize);
-
-    return {
-      items,
-      total,
-      page,
-      pageSize,
-    };
   },
 };

@@ -32,10 +32,11 @@ interface ListingDetailsSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   listing: Listing | null;
-  actionLoading?: "approve" | "reject" | "suspend" | null;
+  actionLoading?: "approve" | "reject" | "suspend" | "reactivate" | null;
   onApprove: () => void;
   onReject: () => void;
   onSuspend: () => void;
+  onReactivate: () => void;
 }
 
 function formatDateTime(value: string) {
@@ -82,6 +83,7 @@ export function ListingDetailsSheet({
   onApprove,
   onReject,
   onSuspend,
+  onReactivate,
 }: ListingDetailsSheetProps) {
   const [activeTab, setActiveTab] = React.useState("details");
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
@@ -373,8 +375,20 @@ export function ListingDetailsSheet({
                   </Button>
                 </div>
               ) : listing.status === "suspended" ? (
-                <div className="text-right text-[12px] text-muted-foreground">
-                  This listing is currently suspended.
+                <div className="flex items-center justify-end">
+                  <Button
+                    type="button"
+                    onClick={() => onReactivate()}
+                    disabled={actionLoading !== null}
+                    className={cn(
+                      "h-10 rounded-full px-4 py-5 text-[13px] font-medium",
+                      "bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800"
+                    )}
+                  >
+                    {actionLoading === "reactivate"
+                      ? "Reactivating..."
+                      : "Reactivate"}
+                  </Button>
                 </div>
               ) : (
                 <div className="text-right text-[12px] text-muted-foreground">

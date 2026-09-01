@@ -23,6 +23,7 @@ import type {
   Booking,
   BookingStatusFilter,
 } from "@/features/bookings/types/booking.types";
+import { STATUS_VARIANTS } from "@/constants/status";
 import { bookingService } from "@/services/booking.service";
 import { cn } from "@/lib/utils";
 import { PaginatedBookings } from "@/features/bookings/types/booking.types";
@@ -33,19 +34,28 @@ interface BookingManagementTableProps {
 
 const STATUS_OPTIONS: { value: BookingStatusFilter; label: string }[] = [
   { value: "all", label: "All" },
-  { value: "approved", label: "Approved" },
   { value: "pending", label: "Pending" },
+  { value: "approved", label: "Approved" },
+  { value: "paid", label: "Paid" },
+  { value: "completed", label: "Completed" },
+  { value: "declined", label: "Declined" },
   { value: "disputed", label: "Disputed" },
   { value: "cancelled", label: "Cancelled" },
-  { value: "completed", label: "Completed" },
 ];
 
+/**
+ * Reuse STATUS_VARIANTS from @/constants/status as the single source of truth
+ * for badge/filter-chip colors. Duplicating hex colors here caused the
+ * disputed chip to drift from StatusBadge. Keep one palette.
+ */
 const STATUS_FILTER_LABEL_CLASS: Record<Exclude<BookingStatusFilter, "all">, string> = {
-  approved: "bg-primary/10 text-primary border-primary/30",
-  pending: "bg-amber-50 text-amber-700 border-amber-200",
-  disputed: "bg-red-50 text-red-600 border-red-200",
-  cancelled: "bg-gray-100 text-gray-700 border-gray-200",
-  completed: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  pending: STATUS_VARIANTS.pending.className,
+  approved: STATUS_VARIANTS.approved.className,
+  paid: STATUS_VARIANTS.paid.className,
+  completed: STATUS_VARIANTS.completed.className,
+  declined: STATUS_VARIANTS.declined.className,
+  disputed: STATUS_VARIANTS.in_progress.className,
+  cancelled: STATUS_VARIANTS.cancelled.className,
 };
 
 export function BookingManagementTable({ onViewDetails }: BookingManagementTableProps) {
@@ -129,7 +139,7 @@ export function BookingManagementTable({ onViewDetails }: BookingManagementTable
                   setPagination((prev) => ({ ...prev, pageIndex: 0 }));
                 }}
                 className={cn(
-                  "h-11 rounded-full px-4 text-[13px] font-semibold border",
+                  "h-11 rounded-full px-4 text-[13px] font-semibold border hover:text-white",
                   STATUS_FILTER_LABEL_CLASS[status as Exclude<BookingStatusFilter, "all">]
                 )}
               >
