@@ -7,7 +7,7 @@ export function AuthLeftPanel() {
       {/* Top section */}
       <div className="relative z-10 space-y-8 xl:space-y-10">
         <div className="flex items-center gap-2">
-          <Image src="/logo-white.svg" alt="logo" width={167} height={32} />
+          <Image src="/vybeshare-logo-white.svg" alt="logo" width={167} height={32} priority />
         </div>
         <h1 className="text-[32px] xl:text-3xl leading-tight max-w-md">
           Powering Bookings Behind the Scenes

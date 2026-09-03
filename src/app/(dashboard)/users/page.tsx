@@ -59,7 +59,7 @@ export default function UsersManagementPage() {
     <div className="flex flex-col gap-6">
       <PageHeader bleed
         title="User Management"
-        subtitle="Manage hosts and guests across SpaceShare."
+        subtitle="Manage hosts and guests across VybeSpace."
       />
 
       <UserManagementTable
@@ -108,8 +108,8 @@ export default function UsersManagementPage() {
         title="Reactivate user account?"
         description={
           selectedUser
-            ? `${selectedUser.fullName} will immediately regain access to their SpaceShare account, dashboard, and active listings or bookings.`
-            : "The selected user will immediately regain access to their SpaceShare account."
+            ? `${selectedUser.fullName} will immediately regain access to their VybeSpace account, dashboard, and active listings or bookings.`
+            : "The selected user will immediately regain access to their VybeSpace account."
         }
         confirmLabel="Reactivate user"
         cancelLabel="Cancel"

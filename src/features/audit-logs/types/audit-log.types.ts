@@ -2,6 +2,7 @@ export type AuditLogAction =
   | "Admin login"
   | "Admin Logout"
   | "Admin suspend user"
+  | "Restored user access"
   | "Invited admin user"
   | "Resent admin invitation"
   | "Cancelled admin invitation"
@@ -9,7 +10,13 @@ export type AuditLogAction =
   | "Restored admin access"
   | "Approved space listing"
   | "Rejected space listing"
-  | "Removed review";
+  | "Suspended space listing"
+  | "Reactivated space listing"
+  | "Removed review"
+  | "Restored review"
+  | "Updated platform commission"
+  | "Verified payment"
+  | "Verified dispute resolution";
 
 export interface AuditLogActor {
   id: string;

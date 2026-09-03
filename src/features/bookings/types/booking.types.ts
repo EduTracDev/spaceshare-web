@@ -1,11 +1,34 @@
 import type { StatusKey } from "@/constants/status";
 
+/**
+ * ⚠️ CANONICAL ADMIN BOOKING STATUS CONTRACT — SINGLE SOURCE OF TRUTH ⚠️
+ *
+ * These exact 7 lowercase literal strings are the ONLY values the backend
+ * ever returns for the `status` field on admin booking endpoints.
+ *
+ * Source of truth — backend function:
+ *   spaceshare-backend/src/services/admin/booking.service.ts → mapStatus()
+ *
+ * Values & semantics (synchronise any changes with backend mapStatus docstring):
+ *   "pending"   BookingStatus.PENDING   — guest submitted request, host has not yet acted
+ *   "approved"  BookingStatus.APPROVED  — host accepted request; guest may or may not have paid
+ *   "declined"  BookingStatus.DECLINED  — host REFUSED the pending request.
+ *                                          NO refund needed — money never moved.
+ *                                          declined ≠ cancelled — see booking.service.ts
+ *   "paid"      BookingStatus.PAID      — guest completed payment; paymentRef set; money held
+ *   "completed" BookingStatus.COMPLETED — event finished; payout released to host
+ *   "cancelled" BookingStatus.CANCELLED — EITHER party cancelled. REFUND required if was PAID.
+ *   "disputed"  (VIRTUAL — not a DB enum) — overrides base status when open Dispute row exists
+ *                                         AND base ∈ {pending, approved, paid, completed}
+ */
 export type BookingStatus =
-  | "approved"
   | "pending"
-  | "disputed"
+  | "approved"
+  | "declined"
+  | "paid"
+  | "completed"
   | "cancelled"
-  | "completed";
+  | "disputed";
 
 export type BookingStatusFilter = "all" | BookingStatus;
 
@@ -68,9 +91,14 @@ export interface PaginatedBookings {
 }
 
 export const BOOKING_STATUS_KEYS: Record<BookingStatus, StatusKey> = {
-  approved: "approved",
   pending: "pending",
-  disputed: "rejected",
-  cancelled: "cancelled",
+  approved: "approved",
+  declined: "declined",
+  paid: "paid",
   completed: "completed",
+  cancelled: "cancelled",
+  // "disputed" → uses StatusKey 'in_progress' — indigo/blue variant is the correct
+  // semantic color for an active open/dispute-in-progress, rather than red 'rejected'
+  // which would imply the dispute was already resolved against someone.
+  disputed: "in_progress",
 };

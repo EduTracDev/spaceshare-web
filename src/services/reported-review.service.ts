@@ -1,129 +1,89 @@
-import { MOCK_REPORTED_REVIEWS } from "@/mocks/reported-reviews.mock";
 import type {
   PaginatedReportedReviews,
   ReportedReview,
   ReportedReviewQueryParams,
 } from "@/features/reported-reviews/types/reported-review.types";
+import { api } from "@/lib/api";
 
-const wait = (ms = 450) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const reviewsDb: ReportedReview[] = JSON.parse(
-  JSON.stringify(MOCK_REPORTED_REVIEWS)
-) as ReportedReview[];
-
-function sortReviews(
-  items: ReportedReview[],
-  sortBy?: ReportedReviewQueryParams["sortBy"],
-  sortOrder: ReportedReviewQueryParams["sortOrder"] = "desc"
-) {
-  if (!sortBy) {
-    return [...items].sort(
-      (a, b) =>
-        (new Date(b.writtenAt).getTime() - new Date(a.writtenAt).getTime()) *
-        (sortOrder === "asc" ? -1 : 1)
-    );
+function extractErrorMessage(error: any): string {
+  if (error?.response?.data?.message && typeof error.response.data.message === "string") {
+    return error.response.data.message;
   }
-
-  const factor = sortOrder === "desc" ? -1 : 1;
-
-  return [...items].sort((a, b) => {
-    if (sortBy === "authorName") {
-      return a.author.fullName.localeCompare(b.author.fullName) * factor;
-    }
-
-    if (sortBy === "reporterName") {
-      return a.reportedBy.fullName.localeCompare(b.reportedBy.fullName) * factor;
-    }
-
-    if (sortBy === "writtenAt") {
-      return (
-        (new Date(a.writtenAt).getTime() - new Date(b.writtenAt).getTime()) * factor
-      );
-    }
-
-    const valueA = a[sortBy as "spaceName" | "status"];
-    const valueB = b[sortBy as "spaceName" | "status"];
-
-    return String(valueA).localeCompare(String(valueB)) * factor;
-  });
+  if (typeof error?.message === "string") return error.message;
+  return "Request failed. Please try again.";
 }
 
 export const reportedReviewService = {
   async getReportedReviews(
     params: ReportedReviewQueryParams = {}
   ): Promise<PaginatedReportedReviews> {
-    await wait();
+    try {
+      const query = new URLSearchParams();
+      if (params.page) query.set("page", String(params.page));
+      if (params.pageSize) query.set("pageSize", String(params.pageSize));
+      if (params.search?.trim()) query.set("search", params.search.trim());
+      if (params.status) query.set("status", params.status);
+      if (params.sortBy) query.set("sortBy", params.sortBy);
+      if (params.sortOrder) query.set("sortOrder", params.sortOrder);
 
-    const page = params.page ?? 1;
-    const pageSize = params.pageSize ?? 6;
-
-    let filtered = [...reviewsDb];
-
-    if (params.search) {
-      const term = params.search.toLowerCase();
-      filtered = filtered.filter((review) =>
-        [
-          review.spaceName,
-          review.reviewText,
-          review.author.fullName,
-          review.reportedBy.fullName,
-          review.reason,
-        ].some((value) => value.toLowerCase().includes(term))
-      );
+      const url = `/reported-reviews${query.toString() ? `?${query.toString()}` : ""}`;
+      const response = await api.get(url);
+      const envelope = response.data;
+      const data = envelope.data ?? envelope;
+      return {
+        items: data.items ?? [],
+        total: Number(data.total ?? 0),
+        page: Number(data.page ?? params.page ?? 1),
+        pageSize: Number(data.pageSize ?? params.pageSize ?? 6),
+      };
+    } catch (error: any) {
+      throw new Error(extractErrorMessage(error));
     }
-
-    if (params.status) {
-      filtered = filtered.filter((review) => review.status === params.status);
-    }
-
-    filtered = sortReviews(filtered, params.sortBy, params.sortOrder);
-
-    const total = filtered.length;
-    const start = (page - 1) * pageSize;
-    const items = filtered.slice(start, start + pageSize);
-
-    return {
-      items,
-      total,
-      page,
-      pageSize,
-    };
   },
 
   async getReportedReviewById(id: string): Promise<ReportedReview> {
-    await wait(250);
-    const review = reviewsDb.find((item) => item.id === id);
-    if (!review) throw new Error("Reported review not found");
-    return JSON.parse(JSON.stringify(review)) as ReportedReview;
+    if (!id) throw new Error("Reported review id is required");
+    try {
+      const response = await api.get(`/reported-reviews/${id}`);
+      const envelope = response.data;
+      const review: ReportedReview =
+        envelope.data?.review ?? envelope.review ?? envelope.data;
+      if (!review) throw new Error("Reported review not found");
+      return review;
+    } catch (error: any) {
+      throw new Error(extractErrorMessage(error));
+    }
   },
 
-  async retainReview(id: string) {
-    await wait(500);
-    const index = reviewsDb.findIndex((item) => item.id === id);
-    if (index >= 0) {
-      reviewsDb[index] = {
-        ...reviewsDb[index],
-        status: "closed",
-        moderatedAt: new Date().toISOString(),
+  async retainReview(id: string): Promise<{ message: string }> {
+    if (!id) throw new Error("Reported review id is required");
+    try {
+      const response = await api.patch(`/reported-reviews/${id}/retain`, {});
+      const envelope = response.data;
+      return {
+        message:
+          envelope.message ??
+          envelope.data?.message ??
+          "Review retained successfully",
       };
+    } catch (error: any) {
+      throw new Error(extractErrorMessage(error));
     }
-    return {
-      message: "Review retained successfully",
-    };
   },
 
-  async removeReview(id: string) {
-    await wait(550);
-    const index = reviewsDb.findIndex((item) => item.id === id);
-    if (index >= 0) {
-      reviewsDb[index] = {
-        ...reviewsDb[index],
-        status: "closed",
-        moderatedAt: new Date().toISOString(),
+  async removeReview(id: string): Promise<{ message: string }> {
+    if (!id) throw new Error("Reported review id is required");
+    try {
+      const response = await api.patch(`/reported-reviews/${id}/remove`, {});
+      const envelope = response.data;
+      return {
+        message:
+          envelope.message ??
+          envelope.data?.message ??
+          "Review removed successfully",
       };
+    } catch (error: any) {
+      throw new Error(extractErrorMessage(error));
     }
-    return {
-      message: "Review removed successfully",
-    };
   },
 };

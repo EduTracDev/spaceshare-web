@@ -161,7 +161,7 @@ export function PasswordSettingsCard() {
                         aria-label={
                           showCurrent ? "Hide password" : "Show password"
                         }
-                        className="absolute top-1/2 right-3 -translate-y-1/2 h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted"
+                        className="absolute top-2 right-3 h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted"
                       >
                         {showCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
                       </Button>
@@ -207,7 +207,7 @@ export function PasswordSettingsCard() {
                       aria-label={
                         showNew ? "Hide password" : "Show password"
                       }
-                      className="absolute top-1/2 right-3 -translate-y-1/2 h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted"
+                      className="absolute top-2 right-3 h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted"
                     >
                       {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
                     </Button>

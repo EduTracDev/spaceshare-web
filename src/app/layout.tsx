@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 import { QueryProvider } from "@/providers/QueryProvider";
 
@@ -19,10 +20,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "SpaceShare Admin Dashboard",
-    template: "%s | SpaceShare Admin",
+    default: "VybeSpace Admin Dashboard",
+    template: "%s | VybeSpace Admin",
   },
-  description: "SpaceShare Admin Dashboard — manage users, listings, bookings, payouts, and disputes.",
+  description: "VybeSpace Admin Dashboard — manage users, listings, bookings, payouts, and disputes.",
 };
 
 export default function RootLayout({
@@ -36,7 +37,21 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          {children}
+          {/* Sonner toaster host: required for `toast.success()`, `toast.error()` etc. to actually render anywhere in the app */}
+          <Toaster
+            position="top-right"
+            closeButton
+            richColors
+            toastOptions={{
+              classNames: {
+                toast:
+                  "md:rounded-2xl !rounded-xl md:shadow-[0_12px_40px_-12px_rgba(15,23,42,0.25)] border-border/70",
+              },
+            }}
+          />
+        </QueryProvider>
       </body>
     </html>
   );

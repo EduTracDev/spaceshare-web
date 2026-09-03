@@ -13,7 +13,7 @@ import { UserAvatar } from "@/components/shared/Avatar";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import type { Booking } from "@/features/bookings/types/booking.types";
 import { BOOKING_STATUS_KEYS } from "@/features/bookings/types/booking.types";
-import { getBookingPaymentLines } from "@/mocks/bookings.mock";
+import { getBookingPaymentLines } from "@/utils/build-payment-lines";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatters";
 

@@ -2,10 +2,12 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { UserCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SIDEBAR_NAV_ITEMS, LOGOUT_ITEM } from "@/constants/navigation";
+import { authService } from "@/services/auth.service";
 import {
   Sheet,
   SheetContent,
@@ -71,11 +73,19 @@ export function Sidebar() {
     []
   );
 
-  const handleLogoutClick = React.useCallback(() => {
-    // TODO: wire real auth service logout() here once Nest backend swap happens.
+  const handleLogoutClick = React.useCallback(async () => {
     setMobileOpen(false);
-    router.replace("/login");
-  }, [router]);
+    
+    try {
+      await authService.logout();
+    } catch (err) {
+      console.warn("logout cleanup warning:", err);
+    }
+    const redirectTo = encodeURIComponent("/dashboard");
+    if (typeof window !== "undefined") {
+      window.location.assign(`/login?next=${redirectTo}`);
+    }
+  }, []);
 
 
 
@@ -96,9 +106,7 @@ export function Sidebar() {
           onClick={onNavigate}
           className="flex items-center gap-2 shrink-0"
         >
-          <span className="font-bold text-lg lg:text-[15px] text-primary tracking-tight">
-            SpaceShare
-          </span>
+          <Image src="/images/VybeSpace Logo.svg" alt="vybespace-logo" width={105} height={105} priority />
         </Link>
         <div className="flex items-center gap-2 pt-1">
           <div className="h-6 w-6 rounded-full bg-primary/10 text-primary flex items-center justify-center">
@@ -152,7 +160,7 @@ export function Sidebar() {
       <div className="p-3 pt-2 border-t border-sidebar-border">
         <button
           type="button"
-          onClick={handleLogoutClick}
+          onClick={handleLogoutClick}   
           className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
         >
           <LogoutIcon size={17} className="shrink-0" />

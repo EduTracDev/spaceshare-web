@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Ban, CheckCircle2, Trash2 } from "lucide-react";
+import { Ban, CheckCircle2, RefreshCw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ConfirmationDialog } from "@/components/shared/ConfirmationDialog";
@@ -18,6 +18,7 @@ export default function SpaceListingsPage() {
   const approveDialog = useDisclosure();
   const rejectDialog = useDisclosure();
   const suspendDialog = useDisclosure();
+  const reactivateDialog = useDisclosure();
   const [selectedListing, setSelectedListing] = React.useState<Listing | null>(null);
 
   const refetchListings = () =>
@@ -59,6 +60,20 @@ export default function SpaceListingsPage() {
     },
   });
 
+  const reactivateMutation = useMutation({
+    mutationFn: (listingId: string) => listingService.reactivateListing(listingId),
+    onSuccess: (result) => {
+      toast.success(result.message);
+      setSelectedListing(result.listing);
+      refetchListings();
+    },
+    onError: (error) => {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to reactivate listing"
+      );
+    },
+  });
+
   const actionLoading =
     approveMutation.isPending
       ? "approve"
@@ -66,6 +81,8 @@ export default function SpaceListingsPage() {
       ? "reject"
       : suspendMutation.isPending
       ? "suspend"
+      : reactivateMutation.isPending
+      ? "reactivate"
       : null;
 
   const handleConfirmApprove = React.useCallback(() => {
@@ -89,6 +106,12 @@ export default function SpaceListingsPage() {
     });
   }, [selectedListing, suspendMutation, suspendDialog]);
 
+  const handleConfirmReactivate = React.useCallback(() => {
+    if (!selectedListing) return;
+    reactivateMutation.mutate(selectedListing.id, {
+      onSettled: () => reactivateDialog.close(),
+    });
+  }, [selectedListing, reactivateMutation, reactivateDialog]);
 
   const approveDialogDescription = selectedListing
     ? `Approve "${selectedListing.spaceName}"? This space will become visible to guests and can start receiving booking requests.`
@@ -101,6 +124,10 @@ export default function SpaceListingsPage() {
   const suspendDialogDescription = selectedListing
     ? `Suspend "${selectedListing.spaceName}"? This listing will immediately become unavailable to guests.`
     : "This listing will immediately become unavailable to guests.";
+
+  const reactivateDialogDescription = selectedListing
+    ? `Reactivate "${selectedListing.spaceName}"? This space will become approved and available again to guests.`
+    : "This space will become approved and available again to guests.";
 
   return (
     <div className="flex flex-col gap-6">
@@ -124,6 +151,7 @@ export default function SpaceListingsPage() {
         onApprove={() => approveDialog.open()}
         onReject={() => rejectDialog.open()}
         onSuspend={() => suspendDialog.open()}
+        onReactivate={() => reactivateDialog.open()}
       />
 
       <ConfirmationDialog
@@ -165,6 +193,20 @@ export default function SpaceListingsPage() {
         cancelLabel="Cancel"
         confirmLoading={suspendMutation.isPending}
         onConfirm={handleConfirmSuspend}
+        size="sm"
+      />
+
+      <ConfirmationDialog
+        open={reactivateDialog.isOpen}
+        onOpenChange={reactivateDialog.toggle}
+        tone="success"
+        icon={RefreshCw}
+        title="Reactivate Space Listing"
+        description={reactivateDialogDescription}
+        confirmLabel="Reactivate Listing"
+        cancelLabel="Cancel"
+        confirmLoading={reactivateMutation.isPending}
+        onConfirm={handleConfirmReactivate}
         size="sm"
       />
     </div>

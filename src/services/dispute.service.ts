@@ -1,111 +1,115 @@
-import { MOCK_DISPUTES, MOCK_DISPUTE_D440 } from "@/mocks/disputes.mock";
 import type {
   Dispute,
   DisputeQueryParams,
   PaginatedDisputes,
 } from "@/features/disputes/types/dispute.types";
+import { api } from "@/lib/api";
 
-const wait = (ms = 450) => new Promise((resolve) => setTimeout(resolve, ms));
+/**
+ * Extract friendly backend message from Axios errors (same pattern as
+ * booking.service.ts + other admin services).
+ */
+function extractErrorMessage(error: unknown): string {
+  if (!error) return "Something went wrong. Please try again.";
+  const err = error as Record<string, any>;
+  const candidate: unknown =
+    err?.response?.data?.message ??
+    err?.response?.data?.error ??
+    err?.message;
+  if (typeof candidate === "string" && candidate.trim().length > 0) {
+    return candidate.trim();
+  }
+  return "Request failed. Please try again.";
+}
 
-const disputesDb: Dispute[] = JSON.parse(JSON.stringify(MOCK_DISPUTES)) as Dispute[];
-
-function sortDisputes(
-  items: Dispute[],
-  sortBy?: DisputeQueryParams["sortBy"],
-  sortOrder: DisputeQueryParams["sortOrder"] = "asc"
-) {
-  if (!sortBy) return items;
-
-  const factor = sortOrder === "desc" ? -1 : 1;
-
-  return [...items].sort((a, b) => {
-    if (sortBy === "guestName") {
-      return a.guest.fullName.localeCompare(b.guest.fullName) * factor;
-    }
-
-    if (sortBy === "hostName") {
-      return a.host.fullName.localeCompare(b.host.fullName) * factor;
-    }
-
-    if (sortBy === "dateFiled") {
-      return (new Date(a.dateFiled).getTime() - new Date(b.dateFiled).getTime()) * factor;
-    }
-
-    const valueA = a[sortBy as "disputeNumber" | "bookingNumber" | "spaceName" | "status"];
-    const valueB = b[sortBy as "disputeNumber" | "bookingNumber" | "spaceName" | "status"];
-
-    return String(valueA).localeCompare(String(valueB)) * factor;
-  });
+/**
+ * Safely unwrap backend envelope { success, data: { items, total, page, pageSize } }
+ * with defensive fallbacks in case envelope shape is changed later.
+ */
+function unwrapPaginated(
+  data: any,
+  params: DisputeQueryParams,
+): PaginatedDisputes {
+  const payload = (data?.data ?? data) as PaginatedDisputes | undefined;
+  if (payload && Array.isArray(payload.items)) {
+    return {
+      items: payload.items,
+      total: typeof payload.total === "number" ? payload.total : 0,
+      page: typeof payload.page === "number" ? payload.page : params.page ?? 1,
+      pageSize:
+        typeof payload.pageSize === "number"
+          ? payload.pageSize
+          : params.pageSize ?? 10,
+    };
+  }
+  return {
+    items: [],
+    total: 0,
+    page: params.page ?? 1,
+    pageSize: params.pageSize ?? 10,
+  };
 }
 
 export const disputeService = {
+  /**
+   * GET /api/admin/disputes
+   * Backend handles: status bucket filter (new = OPEN|UNDER_REVIEW, resolved = RESOLVED|REJECTED),
+   * 6-field search (disputeNumber, bookingNumber, guest+host fullName/email, spaceName),
+   * 7-field sort (DB native for disputeNumber/bookingNumber/spaceName/dateFiled/status;
+   * JS in-memory for guestName/hostName derived fields), accurate count + pagination skip/take.
+   */
   async getDisputes(params: DisputeQueryParams = {}): Promise<PaginatedDisputes> {
-    await wait();
-
-    const page = params.page ?? 1;
-    const pageSize = params.pageSize ?? 10;
-
-    let filtered = [...disputesDb];
-
-    if (params.search) {
-      const term = params.search.toLowerCase();
-      filtered = filtered.filter((dispute) =>
-        [
-          dispute.disputeNumber,
-          dispute.bookingNumber,
-          dispute.guest.fullName,
-          dispute.host.fullName,
-          dispute.spaceName,
-        ].some((value) => value.toLowerCase().includes(term))
-      );
+    try {
+      const response = await api.get("/disputes", {
+        params: {
+          page: params.page ?? 1,
+          pageSize: params.pageSize ?? 10,
+          ...(params.status ? { status: params.status } : {}),
+          ...(params.search ? { search: params.search } : {}),
+          ...(params.sortBy ? { sortBy: params.sortBy } : {}),
+          ...(params.sortOrder ? { sortOrder: params.sortOrder } : {}),
+        },
+      });
+      
+      return unwrapPaginated(response.data, params);
+    } catch (error) {
+      throw new Error(extractErrorMessage(error));
     }
-
-    if (params.status) {
-      filtered = filtered.filter((dispute) => dispute.status === params.status);
-    }
-
-    filtered = sortDisputes(filtered, params.sortBy, params.sortOrder);
-
-    const total = filtered.length;
-    const start = (page - 1) * pageSize;
-    const items = filtered.slice(start, start + pageSize);
-
-    return {
-      items,
-      total,
-      page,
-      pageSize,
-    };
   },
 
+  /**
+   * GET /api/admin/disputes/:id
+   * Backend accepts BOTH CUID AND disputeNumber (DP-001) formats via
+   * findUnique by id → fallback findFirst by disputeNumber.
+   */
   async getDisputeById(id: string): Promise<Dispute> {
-    await wait(250);
-
-    if (id === MOCK_DISPUTE_D440.id) {
-      return JSON.parse(JSON.stringify(MOCK_DISPUTE_D440)) as Dispute;
+    try {
+      const response = await api.get(`/disputes/${id}`);
+      const payload = response?.data?.data as Dispute | undefined;
+      if (!payload || !payload.id) throw new Error("Dispute not found");
+      return payload;
+    } catch (error) {
+      throw new Error(extractErrorMessage(error));
     }
-
-    const dispute = disputesDb.find((item) => item.id === id);
-    if (!dispute) {
-      throw new Error("Dispute not found");
-    }
-
-    return JSON.parse(JSON.stringify(dispute)) as Dispute;
   },
 
-  async markAsResolved(id: string) {
-    await wait(500);
-
-    const index = disputesDb.findIndex((item) => item.id === id);
-    if (index >= 0) {
-      disputesDb[index] = {
-        ...disputesDb[index],
-        status: "resolved",
-      };
+  /**
+   * PATCH /api/admin/disputes/:id/resolve
+   * Mark dispute as RESOLVED in DB. Backend requires status to be "new"
+   * (OPEN or UNDER_REVIEW) or BadRequest. Optional resolutionNote body.
+   * Returns { message } in same envelope shape as mock so caller UI continues
+   * to display the success toast correctly.
+   */
+  async markAsResolved(id: string, resolutionNote?: string) {
+    try {
+      const body = resolutionNote ? { resolutionNote } : {};
+      const response = await api.patch(`/disputes/${id}/resolve`, body);
+      const message =
+        (response?.data?.message as string | undefined) ??
+        "Dispute resolved successfully";
+      return { message };
+    } catch (error) {
+      throw new Error(extractErrorMessage(error));
     }
-
-    return {
-      message: "Dispute resolved successfully",
-    };
   },
 };

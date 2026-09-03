@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -18,6 +18,7 @@ import { authService } from "@/services/auth.service";
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = React.useState(false);
 
   const {
@@ -38,7 +39,11 @@ export function LoginForm() {
   const mutation = useMutation({
     mutationFn: authService.login,
     onSuccess: () => {
-      router.push("/dashboard");
+      const next = searchParams.get("next");
+      // Validate next path is a relative internal URL (prevent open redirect vulnerability)
+      const redirectTo =
+        next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+      router.replace(redirectTo);
       router.refresh();
     },
   });

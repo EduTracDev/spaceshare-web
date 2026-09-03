@@ -65,9 +65,9 @@ export function InviteAdminDialog({
   const mutation = useMutation({
     mutationFn: (v: SchemaValues) =>
       userService.inviteAdmin({
-        fullName: `${v.firstName.trim()} ${v.lastName.trim()}`,
-        email: v.email.trim(),
-        role: "admin",
+        firstName: v.firstName.trim(),
+        lastName: v.lastName.trim(),
+        email: v.email.trim()
       }),
     onSuccess: (r) => {
       toast.success(r.message);
