@@ -20,10 +20,10 @@ export default function BookingsPage() {
 
   const approveMutation = useMutation({
     mutationFn: (bookingId: string) => bookingService.updateBookingStatus(bookingId, "approved"),
-    onSuccess: (result) => {
-      toast.success(result.message);
-      refetchBookings();
-    },
+    // onSuccess: (result) => {
+    //   toast.success(result.message);
+    //   refetchBookings();
+    // },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : "Failed to approve booking");
     },
@@ -31,10 +31,10 @@ export default function BookingsPage() {
 
   const cancelMutation = useMutation({
     mutationFn: (bookingId: string) => bookingService.updateBookingStatus(bookingId, "cancelled"),
-    onSuccess: (result) => {
-      toast.success(result.message);
-      refetchBookings();
-    },
+    // onSuccess: (result) => {
+    //   toast.success(result.message);
+    //   refetchBookings();
+    // },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : "Failed to cancel booking");
     },
@@ -42,10 +42,10 @@ export default function BookingsPage() {
 
   const disputeMutation = useMutation({
     mutationFn: (bookingId: string) => bookingService.updateBookingStatus(bookingId, "disputed"),
-    onSuccess: (result) => {
-      toast.success(result.message);
-      refetchBookings();
-    },
+    // onSuccess: (result) => {
+    //   toast.success(result.message);
+    //   refetchBookings();
+    // },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : "Failed to flag booking as disputed");
     },
@@ -53,10 +53,10 @@ export default function BookingsPage() {
 
   const resolveMutation = useMutation({
     mutationFn: (bookingId: string) => bookingService.updateBookingStatus(bookingId, "completed"),
-    onSuccess: (result) => {
-      toast.success(result.message);
-      refetchBookings();
-    },
+    // onSuccess: (result) => {
+    //   toast.success(result.message);
+    //   refetchBookings();
+    // },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : "Failed to resolve booking");
     },

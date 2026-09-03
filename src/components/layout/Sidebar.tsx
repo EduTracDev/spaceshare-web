@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { UserCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -105,9 +106,7 @@ export function Sidebar() {
           onClick={onNavigate}
           className="flex items-center gap-2 shrink-0"
         >
-          <span className="font-bold text-lg lg:text-[15px] text-primary tracking-tight">
-            SpaceShare
-          </span>
+          <Image src="/images/VybeSpace Logo.svg" alt="vybespace-logo" width={105} height={105} priority />
         </Link>
         <div className="flex items-center gap-2 pt-1">
           <div className="h-6 w-6 rounded-full bg-primary/10 text-primary flex items-center justify-center">

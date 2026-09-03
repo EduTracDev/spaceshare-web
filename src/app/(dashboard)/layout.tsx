@@ -8,7 +8,7 @@ import {
 import { ProtectedRoute } from "@/features/auth/components/ProtectedRoute";
 
 export const metadata: Metadata = {
-  title: { default: "Dashboard", template: "%s | SpaceShare Admin" },
+  title: { default: "Dashboard", template: "%s | VybeSpace Admin" },
 };
 
 
@@ -54,7 +54,7 @@ export default function DashboardLayout({
             </button>
             <div className="ml-3 flex items-center gap-2">
               <span className="font-bold text-xl text-primary tracking-tight">
-                SpaceShare
+                VybeSpace
               </span>
             </div>
             <div className="ml-auto flex items-center justify-end shrink-0">

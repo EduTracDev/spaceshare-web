@@ -1,4 +1,3 @@
-// spaceshare-web/src/middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import * as jose from "jose";  // npm i jose   ← (NOT jsonwebtoken — jose works in Edge Runtime which middleware uses!)
@@ -14,18 +13,18 @@ const PUBLIC_PATHS = new Set([
 ]);
 
 // COOKIE NAME — MUST match exactly what we set in login step
-const AUTH_COOKIE = "spaceshare_jwt";
+const AUTH_COOKIE = "vybespace_jwt";
 
 // JWT SECRET — loaded from .env.local because middleware runs on server too!
 // MUST match backend's JWT_SECRET exactly.
-async function getJwtSecret() {
-  const secret = process.env.NEXT_PUBLIC_JWT_SECRET;
-  if (!secret) {
-    // console.warn("⚠️  middleware: JWT_SECRET env missing, falling back to allow-all for dev");
-    return null;
-  }
-  return new TextEncoder().encode(secret);
-}
+// async function getJwtSecret() {
+//   const secret = process.env.NEXT_PUBLIC_JWT_SECRET;
+//   if (!secret) {
+//     // console.warn("⚠️  middleware: JWT_SECRET env missing, falling back to allow-all for dev");
+//     return null;
+//   }
+//   return new TextEncoder().encode(secret);
+// }
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -38,7 +37,7 @@ export async function middleware(request: NextRequest) {
   }
 
   /* ---- 2) Dashboard/admin protected area: check cookie ---- */
-  const tokenCookie = request.cookies.get(AUTH_COOKIE)?.value ?? "nothinghere";
+  const tokenCookie = request.cookies.get(AUTH_COOKIE)?.value ?? "";
   if (!tokenCookie) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
@@ -66,7 +65,6 @@ export async function middleware(request: NextRequest) {
   //   }
   // }
 
-  /* ---- 4) All checks passed: allow request through ---- */
   return NextResponse.next();
 }
 
@@ -79,6 +77,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    "/((?!_next/static|_next/image|favicon.ico).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|map|txt|xml)$).*)",
   ],
 };

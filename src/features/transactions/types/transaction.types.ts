@@ -13,22 +13,37 @@ export type BookingStatus =
   | "COMPLETED"
   | "CANCELLED";
 
+/** 3 transaction tabs — exactly matches backend Prisma TransactionType enum (lowercase UI) */
+export type TransactionTab = "payments" | "payouts" | "refunds";
+
+/** 3 ledger-typed values — exactly what backend returns, no derivation */
 export type TransactionType = "payment" | "payout" | "refund";
 
-/** Raw DB Transaction.status enum (only 3 values, never changes) */
+/** Raw DB Transaction.status enum (3 values only).
+ *  Frontend no longer derives 7 badge colors — badge maps directly from this.
+ */
 export type DbTransactionStatus = "PENDING" | "SUCCESSFUL" | "FAILED";
 
-/* 7 frontend statuses = derived from (type × dbStatus × booking.status) */
-export type TransactionStatus =
-  | "pending"    // Payment or payout BEFORE the event
-  | "success"    // PAYMENT — guest paid into platform successfully
-  | "failed"     // Any transaction type returned failure
-  | "completed"  // IRONCLAD: PAYOUT pending DB + BOOKING COMPLETED event
-  | "paid"       // PAYOUT — admin completed offline bank transfer
-  | "cancelled"  // REFUND pending (cancelled booking, refund queued)
-  | "refunded";  // REFUND successful (cash returned to guest)
+/** Status dropdown filter (4 options: All + 3 DB statuses). Replaces old 7-filter. */
+export type TransactionStatusFilter =
+  | "all"
+  | "pending"
+  | "success"
+  | "failed";
 
-export type TransactionStatusFilter = "all" | TransactionStatus;
+/** Maps TransactionTab (plural UI label) <-> TransactionType (backend singular).
+ *  Used when sending backend `type` query param from currently selected tab. */
+export const TAB_TO_TYPE: Record<TransactionTab, TransactionType> = {
+  payments: "payment",
+  payouts:  "payout",
+  refunds:  "refund",
+};
+
+export const TYPE_TO_TAB: Record<TransactionType, TransactionTab> = {
+  payment: "payments",
+  payout:  "payouts",
+  refund:  "refunds",
+};
 
 export interface TransactionHost {
   id: string;
@@ -58,8 +73,8 @@ export interface CancellationInfo {
   byName: string;
   /** Email of canceller (snapshot) */
   byEmail: string;
-  /** Authoritative role from backend (Booking.cancelledByRole enum): HOST | GUEST — NO FRONTEND GUESSING */
-  byRole: "HOST" | "GUEST";
+  /** Authoritative role from backend (Booking.cancelledByRole enum): HOST | GUEST | ADMIN — NO FRONTEND GUESSING */
+  byRole: "HOST" | "GUEST" | "ADMIN";
   /** ISO timestamp of when cancellation occurred (Booking.cancelledAt) */
   timestamp: string;
   /** Booking.cancelReason */
@@ -94,43 +109,75 @@ export interface Transaction {
   host: TransactionHost;
   guest?: TransactionGuest;
   /**
-   * Backend fills this from Booking.status — REQUIRED for deriveFrontendStatus:
-   * PAYOUT pending + booking COMPLETED → frontend completed (Mark as Paid lives here)
+   * Booking status (PENDING / PAID / APPROVED / COMPLETED / CANCELLED).
+   * Non-negotiable column visible on Payouts & Refunds tabs for button eligibility.
+   * Eligibility rules:
+   *   Mark As Paid visible ONLY when:
+   *     type === 'payout' AND dbStatus === 'PENDING' AND bookingStatus === 'COMPLETED'
+   *   Mark Refunded visible ONLY when:
+   *     type === 'refund' AND dbStatus === 'PENDING' AND bookingStatus === 'CANCELLED'
    */
-  bookingStatus?: BookingStatus;
+  bookingStatus: BookingStatus;
   eventDate: string;
-  /** Renamed from paymentDate: generic for payouts + refunds (not just payments) */
+  /** Generic transaction init timestamp (not just payments) */
   transactionDate: string;
   /** Generic amount (direction shown by type badge, not stored as +/- sign) */
   amount: number;
   commission: number;
   netPayout: number;
   /**
-   * Derive this field using `deriveFrontendStatus` from {type, bookingStatus, DB status}.
-   * NEVER hard-code pending/completed: the 2 are contextual based on booking.event done.
+   * RAW DB status (3 values). Replaces old derived 7-status.
+   * Badge color now maps 1:1 from this via TRANSACTION_DB_STATUS_KEYS below.
    */
-  status: TransactionStatus;
-  /** Financial ledger breakdown — renamed from `payout` to be agnostic across all 3 types */
+  dbStatus: DbTransactionStatus;
+  /** Financial ledger breakdown — same shape as backend shaper */
   breakdown: FinancialBreakdown;
   cancellation?: CancellationInfo;
   refund?: RefundInfo;
+  /**
+   * USER recipient receiving the cash movement (OUT of SpaceShare).
+   *
+   *   PAYMENT  → NULL. Money goes INTO SpaceShare holding account; no user recipient.
+   *             Payment Details Dialog: NO bank card (Figma 1 & 2). Shows Payment Breakdown only.
+   *   PAYOUT   → HOST or GUEST. Recipient bank card visible in Dialog (Figma 3). Mark As Paid button.
+   *   REFUND   → GUEST only. Cancelled booking cash-back. Bank card + Mark Refunded button (Figma 4).
+   */
+  recipientRole: "HOST" | "GUEST" | null;
+  recipientName: string | null;
+  recipientEmail: string | null;
+  /**
+   * Counter-party identity = the user on the OTHER side of the transaction.
+   * Used everywhere (always populated, non-null, no heuristics, explicit):
+   * - Payments tab "Name" column → Guest who paid us (since recipient = NULL platform)
+   * - Dialog header title → Mike Johnson (counter-party name)
+   * - Sorted by Name column → counterpartyName sorts
+   */
+  counterpartyRole: "HOST" | "GUEST";
+  counterpartyName: string;
+  counterpartyEmail: string;
 }
 
 export interface TransactionQueryParams {
   search?: string;
+  /** 3-value filter: All | pending | success | failed (maps 1:1 to DB status via FILTER_TO_DB below) */
   status?: TransactionStatusFilter;
   page?: number;
   pageSize?: number;
   sortBy?:
-    | "bookingNumber"
-    | "hostName"
-    | "eventDate"
+    | "transactionNumber" 
+    | "bookingNumber" 
+    | "name"           
+    | "hostName"          
     | "amount"
+    | "status"
+    | "eventDate"          
     | "commission"
     | "netPayout"
-    | "status";
+    | "transactionDate"    
+    | "dateCancelled";    
   sortOrder?: "asc" | "desc";
   type?: "all" | TransactionType;
+  tab?: TransactionTab;
 }
 
 export interface PaginatedTransactions {
@@ -140,70 +187,88 @@ export interface PaginatedTransactions {
   pageSize: number;
 }
 
-/**
- * Badge coloring — matches exact 7-status flow:
- *   pending    → amber "Pending"
- *   success    → green "Approved" (guest paid platform ✓)
- *   failed     → red "Failed"
- *   completed  → emerald "Completed" ✅ EVENT DONE, PAYOUT QUEUED (Mark As Paid button LIVES HERE ONLY)
- *   paid       → green "Paid" ✨ Host payout FINALIZED (button disappears — previously this used "completed" same label = bug)
- *   cancelled  → grey "Cancelled" (refund pending)
- *   refunded   → emerald "Closed" (refund processed, distinct from "Completed"/button-target rows)
- */
-export const TRANSACTION_STATUS_KEYS: Record<TransactionStatus, StatusKey> = {
-  pending:   "pending",
-  success:   "approved",
-  failed:    "failed",
-  completed: "completed",
-  paid:      "paid",
-  cancelled: "cancelled",
-  refunded:  "closed",
-};
-
 /* -------------------------------------------------------------------------- */
-/*                     CANONICAL FRONTEND STATUS DERIVATION                   */
+/*                          STATUS ↔ FILTER / BADGE MAPS                      */
 /*                                                                            */
-/* BACKEND MIRRORS THIS FUNCTION EXACTLY (admin/transaction.service.ts).     */
-/* If you modify this logic, update BOTH SIDES so badges stay in sync.       */
+/*  ALL DERIVATION LOGIC DELETED. Everything maps raw DB enums 1:1.           */
 /* -------------------------------------------------------------------------- */
 
-const FALLBACK: Record<string, TransactionStatus> = {
-  "PAYMENT|PENDING":    "pending",
-  "PAYMENT|SUCCESSFUL": "success",
-  "PAYMENT|FAILED":     "failed",
-  "PAYOUT|SUCCESSFUL":  "paid",
-  "PAYOUT|FAILED":      "failed",
-  "REFUND|PENDING":     "cancelled",
-  "REFUND|SUCCESSFUL":  "refunded",
-  "REFUND|FAILED":      "failed",
+/** Maps TransactionStatusFilter dropdown selection → backend DB status.
+ *  'all' → no filter. */
+export const FILTER_TO_DB: Record<
+  Exclude<TransactionStatusFilter, "all">,
+  DbTransactionStatus
+> = {
+  pending: "PENDING",
+  success: "SUCCESSFUL",
+  failed:  "FAILED",
+};
+
+export const DB_TO_FILTER: Record<DbTransactionStatus, Exclude<TransactionStatusFilter, "all">> = {
+  PENDING:    "pending",
+  SUCCESSFUL: "success",
+  FAILED:     "failed",
 };
 
 /**
- * IRONCLAD RULE 1 (special-cased because admin workflow depends on it):
- *   payout + DB pending + booking COMPLETED → "completed"
- *   (admin sees Mark As Paid button ONLY on completed-status rows, NOT pending)
- *
- * Everything else falls back to the standard 3×3 table.
+ * Badge coloring — 3 values only (no more completed/paid/cancelled/refunded magic).
+ *   pending   → amber "Pending"
+ *   success   → green "Success" (replaces old "Approved/Paid/Closed/Completed" variants)
+ *   failed    → red "Failed"
  */
-export function deriveFrontendStatus(
-  row: Pick<Transaction, "type" | "bookingStatus"> & {
-    /** Provide the raw DB (PENDING / SUCCESSFUL / FAILED) status for accurate derivation */
-    dbStatus: DbTransactionStatus;
-  }
-): TransactionStatus {
-  const t: "PAYMENT" | "PAYOUT" | "REFUND" =
-    row.type === "payment" ? "PAYMENT"
-    : row.type === "payout" ? "PAYOUT"
-    : "REFUND";
+export const TRANSACTION_DB_STATUS_KEYS: Record<DbTransactionStatus, StatusKey> = {
+  PENDING:    "pending",
+  SUCCESSFUL: "approved",
+  FAILED:     "failed",
+};
 
-  if (
-    t === "PAYOUT" &&
+/** Human-readable badge labels shown on Status column / dropdown. */
+export const DB_STATUS_LABELS: Record<DbTransactionStatus, string> = {
+  PENDING:    "Pending",
+  SUCCESSFUL: "Success",
+  FAILED:     "Failed",
+};
+
+/** Tab labels & colors. */
+export const TAB_LABELS: Record<TransactionTab, string> = {
+  payments: "Payments",
+  payouts:  "Payouts",
+  refunds:  "Refunds",
+};
+
+/**
+ * Helpers — button visibility & eligibility.
+ * These live on the frontend — backend STILL enforces 5 ironclad guards server-side.
+ * Frontend just uses these to enable/disable buttons.
+ */
+export function canMarkPayoutAsPaid(
+  row: Pick<Transaction, "type" | "dbStatus" | "bookingStatus">
+): boolean {
+  return (
+    row.type === "payout" &&
     row.dbStatus === "PENDING" &&
     row.bookingStatus === "COMPLETED"
-  ) {
-    return "completed";
-  }
-
-  const key = `${t}|${row.dbStatus}`;
-  return FALLBACK[key] ?? "pending";
+  );
 }
+
+export function canMarkRefundAsRefunded(
+  row: Pick<Transaction, "type" | "dbStatus" | "bookingStatus">
+): boolean {
+  return (
+    row.type === "refund" &&
+    row.dbStatus === "PENDING" &&
+    row.bookingStatus === "CANCELLED"
+  );
+}
+
+/** Tooltip message to show on disabled pending payout button (explain why greyed). */
+export function payoutIneligibilityReason(
+  row: Pick<Transaction, "type" | "dbStatus" | "bookingStatus">
+): string | null {
+  if (row.type !== "payout" || row.dbStatus !== "PENDING") return null;
+  if (row.bookingStatus !== "COMPLETED") {
+    return `Booking not completed yet (status: ${row.bookingStatus}). You cannot release payout before the event has occurred.`;
+  }
+  return null;
+}
+

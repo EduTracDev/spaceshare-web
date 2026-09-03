@@ -3,6 +3,14 @@ import type {
   Transaction,
   TransactionQueryParams,
 } from "@/features/transactions/types/transaction.types";
+import {
+  TAB_TO_TYPE,
+  FILTER_TO_DB,
+  type DbTransactionStatus,
+  type TransactionType,
+  type TransactionStatusFilter,
+  type TransactionTab,
+} from "@/features/transactions/types/transaction.types";
 import { api } from "@/lib/api";
 
 /**
@@ -51,30 +59,60 @@ function unwrapPaginated(
   };
 }
 
+/**
+ * Resolve backend `type` query param from TransactionQueryParams.
+ * Priority:
+ *   1. explicit legacy `type` param (caller passed 'all' | 'payment' | 'payout' | 'refund')
+ *   2. new `tab` param (payments/payouts/refunds plural UI)
+ *   3. default: payments tab -> payment type
+ */
+function resolveBackendType(
+  params: TransactionQueryParams
+): "all" | TransactionType {
+  if (params.type) return params.type;
+  if (params.tab) return TAB_TO_TYPE[params.tab as TransactionTab];
+  return "payment"; // match default tab=Payments when neither provided
+}
+
+/**
+ * Resolve backend status query param from dropdown filter. Dropdown sends
+ * human-friendly 'all/pending/success/failed'. Backend expects raw DB
+ * PENDING/SUCCESSFUL/FAILED uppercase. Returns undefined (no filter) for 'all'.
+ */
+function resolveBackendStatus(
+  filter: TransactionStatusFilter | undefined
+): DbTransactionStatus | undefined {
+  if (!filter || filter === "all") return undefined;
+  return FILTER_TO_DB[filter];
+}
+
 export const transactionService = {
   /**
    * GET /api/admin/transactions
-   * Paginated list with filters, search, sort. Backend runs canonical 7-status badge
-   * via shaper (deriveFrontendStatus on backend) so row.status === display badge.
-   * Server-side handles: 7-status badge filter, type filter, 3-way search,
-   * 8-column sort, accurate paginated counts.
+   * New simplified 3-tab query. No more 7-status decoder needed on backend.
+   * Tab dropdown drives `type` directly. Status dropdown drives DB status directly.
+   * Backend applies SQL WHERE + sort natively (no post-fetch in-memory filter hacks).
    */
   async getTransactions(params: TransactionQueryParams = {}): Promise<PaginatedTransactions> {
     try {
+      const backendType = resolveBackendType(params);
+      const backendStatus = resolveBackendStatus(params.status);
+
       const response = await api.get("/transactions", {
         params: {
           page: params.page ?? 1,
           pageSize: params.pageSize ?? 10,
-          ...(params.type ? { type: params.type } : {}),
-          ...(params.status ? { status: params.status } : {}),
+          ...(backendType && backendType !== "all" ? { type: backendType } : {}),
+          ...(backendStatus ? { status: backendStatus } : {}),
           ...(params.search ? { search: params.search } : {}),
           ...(params.sortBy ? { sortBy: params.sortBy } : {}),
           ...(params.sortOrder ? { sortOrder: params.sortOrder } : {}),
         },
       });
-
+      console.log("Track:", response.data);
       return unwrapPaginated(response.data, params);
     } catch (error) {
+      console.log("error:", error);
       throw new Error(extractErrorMessage(error));
     }
   },
@@ -82,6 +120,7 @@ export const transactionService = {
   /**
    * GET /api/admin/transactions/:id
    * Backend returns fully-shaped Transaction DTO for details dialog.
+   * Now includes raw dbStatus (3 values) + bookingStatus explicit (no derive).
    */
   async getTransactionById(id: string): Promise<Transaction> {
     try {
@@ -98,7 +137,7 @@ export const transactionService = {
    * POST /api/admin/transactions/:id/mark-as-paid
    * Backend enforces 5 ironclad guards: exists, type=PAYOUT, dbStatus=PENDING,
    * booking.status=COMPLETED, no OPEN/UNDER_REVIEW disputes on booking.
-   * Batch pays BOTH pending payout rows (host net + guest caution atomically.
+   * Batch pays BOTH pending payout rows (host net + guest caution) atomically.
    * Success returns { message, rowsPaid, paidAt }.
    */
   async markAsPaid(id: string) {

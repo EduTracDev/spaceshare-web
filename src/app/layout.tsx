@@ -20,10 +20,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "SpaceShare Admin Dashboard",
-    template: "%s | SpaceShare Admin",
+    default: "VybeSpace Admin Dashboard",
+    template: "%s | VybeSpace Admin",
   },
-  description: "SpaceShare Admin Dashboard — manage users, listings, bookings, payouts, and disputes.",
+  description: "VybeSpace Admin Dashboard — manage users, listings, bookings, payouts, and disputes.",
 };
 
 export default function RootLayout({

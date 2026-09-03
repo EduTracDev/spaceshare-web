@@ -31,6 +31,7 @@ export const userService = {
       const envelope = response.data;
       // Backend wraps under `data: { items, total, page, pageSize }`
       const payload: PaginatedUsers = envelope.data ?? envelope;
+      console.log("res:", payload.items);
       return {
         items: payload.items ?? [],
         total: payload.total ?? 0,

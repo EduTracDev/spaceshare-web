@@ -48,6 +48,7 @@ const STATUS_DOT_COLOR = {
   rejected: "bg-red-500",
   failed: "bg-red-500",
   hidden: "bg-gray-400",
+  declined: "bg-red-500",
 } as const;
 
 export function UserAvatar({

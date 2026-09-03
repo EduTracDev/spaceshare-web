@@ -84,9 +84,9 @@ export function UserManagementTable({
   const actions: UserRowActions = { onViewDetails, onSuspend, onReactivate };
 
   const columns = React.useMemo<ColumnDef<AnyUser>[]>(
-    () => buildUserColumns(actions),
+    () => buildUserColumns(actions, role),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [onViewDetails, onSuspend, onReactivate]
+    [onViewDetails, onSuspend, onReactivate, role]
   );
 
   const query = useQuery<PaginatedUsers, Error>({

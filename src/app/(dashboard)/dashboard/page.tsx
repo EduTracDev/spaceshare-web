@@ -27,7 +27,7 @@ export default function DashboardPage() {
       <PageHeader
         bleed
         title="Admin Dashboard"
-        subtitle="Welcome back, Admin - here's what's happening on SpaceShare."
+        subtitle="Welcome back, Admin - here's what's happening on VybeSpace."
       />
 
       {isLoading && !dashboardQ.data ? (

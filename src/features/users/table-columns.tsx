@@ -1,10 +1,8 @@
 "use client";
 
-import * as React from "react";
-import Link from "next/link";
-import type { ColumnDef } from "@tanstack/react-table";
-import { Ban, CircleCheckBig, Copy, EllipsisVertical, Eye, MoreHorizontal } from "lucide-react";
-import { UserAvatar } from "@/components/shared/Avatar";
+
+import type { ColumnDef, CellContext } from "@tanstack/react-table";
+import { Ban, CircleCheckBig, EllipsisVertical, Eye } from "lucide-react";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { AnyUser, HostUser, AdminUser } from "@/features/users/types/user.types";
+import type { AnyUser, HostUser, AdminUser, GuestUser, UserRoleTab } from "@/features/users/types/user.types";
 import { cn } from "@/lib/utils";
 
 export interface UserRowActions {
@@ -33,17 +31,16 @@ function RoleBadge({ role }: { role: AnyUser["role"] }) {
   );
 }
 
-export function buildUserColumns(actions: UserRowActions): ColumnDef<AnyUser>[] {
+export function buildUserColumns(actions: UserRowActions, roleTab: UserRoleTab): ColumnDef<AnyUser>[] {
   return [
     {
       accessorKey: "fullName",
       header: "Name",
       enableSorting: true,
-      cell: ({ row }) => {
+      cell: ({ row }: CellContext<AnyUser, unknown>) => {
         const u = row.original;
         return (
           <div className="group flex items-center gap-3 w-full text-left -my-1 py-1 pr-2">
-            {/* <UserAvatar name={u.fullName} imageUrl={u.avatarUrl} size="md" status={u.status === "suspended" ? null : u.status} /> */}
             <div className="flex flex-col min-w-0">
               <span className="text-[13px] font-medium text-foreground truncate group-hover:text-primary transition-colors">
                 {u.fullName}
@@ -57,22 +54,11 @@ export function buildUserColumns(actions: UserRowActions): ColumnDef<AnyUser>[] 
       accessorKey: "email",
       header: "Email",
       enableSorting: true,
-      cell: ({ row }) => {
+      cell: ({ row }: CellContext<AnyUser, unknown>) => {
         const email = row.getValue("email") as string;
         return (
           <div className="flex items-center gap-2">
             <span className="text-[13px] text-foreground/85 truncate max-w-[220px]">{email}</span>
-            {/* <button
-              type="button"
-              onClick={(event) => {
-                event.stopPropagation();
-                void navigator.clipboard?.writeText(email);
-              }}
-              aria-label="Copy email"
-              className="shrink-0 h-6 w-6 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 flex items-center justify-center transition-colors"
-            >
-              <Copy size={12} />
-            </button> */}
           </div>
         );
       },
@@ -82,29 +68,42 @@ export function buildUserColumns(actions: UserRowActions): ColumnDef<AnyUser>[] 
       header: "Role",
       enableSorting: true,
       size: 100,
-      cell: ({ row }) => <RoleBadge role={row.original.role} />,
+      cell: ({ row }: CellContext<AnyUser, unknown>) => <RoleBadge role={row.original.role} />,
     },
-    {
-      accessorKey: "totalListings",
-      header: "Listings",
-      enableSorting: true,
-      size: 90,
-      cell: ({ row }) => {
-        const u = row.original;
-        if (u.role === "host") {
-          return <span className="text-[13px] font-medium text-foreground">{(u as HostUser).totalListings}</span>;
+    roleTab === "host"
+      ? {
+          accessorKey: "totalListings",
+          header: "Listings",
+          enableSorting: true,
+          size: 90,
+          cell: ({ row }: CellContext<AnyUser, unknown>) => {
+            const u = row.original;
+            if (u.role === "host") {
+              return <span className="text-[13px] font-medium text-foreground">{(u as HostUser).totalListings}</span>;
+            }
+            return <span className="text-[13px] text-muted-foreground">—</span>;
+          },
         }
-        if (u.role === "guest") {
-          return <span className="text-[13px] font-medium text-foreground">—</span>;
-        }
-        return <span className="text-[13px] text-muted-foreground">—</span>;
-      },
-    },
+      : roleTab === "guest"
+        ? {
+            accessorKey: "totalBookings",
+            header: "Bookings",
+            enableSorting: true,
+            size: 90,
+            cell: ({ row }: CellContext<AnyUser, unknown>) => {
+              const u = row.original;
+              if (u.role === "guest") {
+                return <span className="text-[13px] font-medium text-foreground">{(u as GuestUser).totalBookings}</span>;
+              }
+              return <span className="text-[13px] text-muted-foreground">—</span>;
+            },
+          }
+        : null,
     {
       accessorKey: "dateRegistered",
       header: "Date Registered",
       enableSorting: true,
-      cell: ({ row }) => {
+      cell: ({ row }: CellContext<AnyUser, unknown>) => {
         const value = row.getValue("dateRegistered") as string | undefined;
         if (!value) return <span className="text-[12px] text-muted-foreground">Invite pending</span>;
         return <span className="text-[12.5px] text-foreground/85 whitespace-nowrap">{value}</span>;
@@ -115,7 +114,7 @@ export function buildUserColumns(actions: UserRowActions): ColumnDef<AnyUser>[] 
       header: "Status",
       enableSorting: true,
       size: 120,
-      cell: ({ row }) => (
+      cell: ({ row }: CellContext<AnyUser, unknown>) => (
         <StatusBadge status={row.original.status} />
       ),
     },
@@ -124,7 +123,7 @@ export function buildUserColumns(actions: UserRowActions): ColumnDef<AnyUser>[] 
       header: () => <span className="sr-only">Actions</span>,
       enableSorting: false,
       size: 60,
-      cell: ({ row }) => {
+      cell: ({ row }: CellContext<AnyUser, unknown>) => {
         const u = row.original;
         const canSuspend = u.status === "active" || u.status === "pending";
         const canReactivate = u.status === "suspended";
@@ -178,5 +177,5 @@ export function buildUserColumns(actions: UserRowActions): ColumnDef<AnyUser>[] 
         );
       },
     },
-  ];
+  ].filter(Boolean) as ColumnDef<AnyUser>[];
 }

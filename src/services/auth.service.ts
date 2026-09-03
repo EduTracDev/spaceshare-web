@@ -27,10 +27,10 @@ export const authService = {
       localStorage.setItem("token", token);
       // Also write to cookie for Next.js middleware check
       const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days, matches backend JWT expiresIn
-      document.cookie = `spaceshare_jwt=${token}; ` + `path=/; ` + `SameSite=Lax; ` + `expires=${expires.toUTCString()}; ` + (window.location.protocol === 'https:' ? 'Secure; ' : '');   
+      document.cookie = `vybespace_jwt=${token}; ` + `path=/; ` + `SameSite=Lax; ` + `expires=${expires.toUTCString()}; ` + (window.location.protocol === 'https:' ? 'Secure; ' : '');   
       return data;
     } catch(error: any){
-      const errorMessage = error?.response?.data?.message ?? "Login failed";
+      const errorMessage = error?.response?.data?.message ?? error?.message ?? "Login failed";
       throw new Error(errorMessage);
     }
   },
@@ -45,7 +45,7 @@ export const authService = {
         message: `A reset link has been sent to ${payload.email}. It will expire in 15 minutes.`,
       };
     } catch(error: any){
-      const errorMessage = error?.response?.data?.message ?? "Request failed";
+      const errorMessage = error?.response?.data?.message ?? error?.message ?? "Request failed";
       throw new Error(errorMessage);  
     }
   },
@@ -64,14 +64,14 @@ export const authService = {
         message: "Your password has been updated successfully. You can now log in.",
       };
     } catch(error: any){
-      const errorMessage = error?.response?.data?.message ?? "Password reset request failed";
+      const errorMessage = error?.response?.data?.message ?? error?.message ?? "Password reset request failed";
       throw new Error(errorMessage);  
     }
   },
 
   async logout(): Promise<void> {
     localStorage.removeItem("token");
-    document.cookie = 'spaceshare_jwt=; path=/; SameSite=Lax; expires=Thu, 01 Jan 1970 00:00:00 GMT; ' + (window.location.protocol === 'https:' ? 'Secure; ' : '');
+    document.cookie = 'vybespace_jwt=""; path=/; SameSite=Lax; expires=Thu, 01 Jan 1970 00:00:00 GMT; ' + (window.location.protocol === 'https:' ? 'Secure; ' : '');
     await delay(null, 200);
   },
 
@@ -94,10 +94,7 @@ export const authService = {
         message: envelope.message ?? "Invitation accepted successfully",
       };
     } catch (error: any) {
-      const serverMessage =
-        error?.response?.data?.message ??
-        error?.message ??
-        "Failed to accept invitation. Please try again.";
+      const serverMessage = error?.response?.data?.message ?? error?.message ?? "Failed to accept invitation. Please try again.";
       throw new Error(serverMessage);
     }
   },
