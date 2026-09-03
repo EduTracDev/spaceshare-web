@@ -257,7 +257,7 @@ export function TransactionManagementTable({ onViewDetails }: TransactionManagem
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-11 hidden xl:block rounded-xl border-border bg-background px-4 text-[13px] font-medium"
+                      className="h-11 hidden xl:flex items-center rounded-xl border-border bg-background px-4 text-[13px] font-medium"
                     />
                   }
                 >
