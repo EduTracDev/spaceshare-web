@@ -73,7 +73,7 @@ export const bookingService = {
           pageSize: params.pageSize ?? 10,
         };
       }
-      console.log("res:", envelope.items);
+      
       return {
         items: envelope.items,
         total: typeof envelope.total === "number" ? envelope.total : 0,

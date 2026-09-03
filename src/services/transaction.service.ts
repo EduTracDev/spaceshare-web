@@ -109,7 +109,7 @@ export const transactionService = {
           ...(params.sortOrder ? { sortOrder: params.sortOrder } : {}),
         },
       });
-      console.log("Track:", response.data);
+    
       return unwrapPaginated(response.data, params);
     } catch (error) {
       console.log("error:", error);
