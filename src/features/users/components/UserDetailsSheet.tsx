@@ -40,11 +40,27 @@ export function UserDetailsSheet({
       ? "Super Admin"
       : user.role[0].toUpperCase() + user.role.slice(1);
 
-  const bookings = user.role === "guest" ? (user as any).totalBookings : 38;
-  const listings = user.role === "host" ? (user as HostUser).totalListings : 6;
-  const isInvitedAdmin = user.role === "admin" && !user.dateRegistered;
+  // ---- Activity counts ----
+  // RULES:
+  //  - GUESTS: Bookings count populated from user.totalBookings (Listings = 0 (guests never list)
+  //  - HOSTS:  Listings count populated from user.totalListings, Bookings = 0
+  //  - ADMINS / SUPER_ADMINS: Both = 0 (they are staff, not platform users) + hide grid hidden via conditional render below
+  const bookings =
+    user.role === "guest"
+      ? ((user as any).totalBookings ?? 0)
+      : 0;
+  const listings =
+    user.role === "host"
+      ? ((user as HostUser).totalListings ?? 0)
+      : 0;
+
+  // ---- Date labels ----
+  const isInvitedAdmin =
+    (user.role === "admin" || user.role === "super_admin") &&
+    !!user.dateRegistered;
+  const registrationLabel = isInvitedAdmin ? "Accepted Invite On" : "Registration Date";
   const registrationDate = isInvitedAdmin
-    ? "Invite pending"
+    ? user.dateRegistered
     : user.dateRegistered ?? "Invite pending";
 
   const canSuspend = user.status === "active" || user.status === "pending";
@@ -87,7 +103,25 @@ export function UserDetailsSheet({
           <div className="flex-1 overflow-y-auto px-6 pt-4 space-y-1 overscroll-contain scrollbar-gutter-stable">
             <InfoRow icon={Phone} label="Phone" value={user.phone ?? "—"} copyable={user.phone ?? undefined} />
             <InfoRow icon={Mail} label="Email" value={user.email} copyable={user.email} />
-            <InfoRow icon={Calendar} label="Registration Date" value={registrationDate} />
+            <InfoRow icon={Calendar} label={registrationLabel} value={registrationDate} />
+
+            {/* Show invited-by info ONLY for staff admin roles */}
+            {(user.role === "admin" || user.role === "super_admin") &&
+            ((user as AdminUser).invitedByName || (user as AdminUser).invitedByEmail || (user as AdminUser).invitedAt) ? (
+              <InfoRow
+                icon={BadgeCheck}
+                label="Invited By"
+                value={(() => {
+                  const name = (user as AdminUser).invitedByName;
+                  const email = (user as AdminUser).invitedByEmail;
+                  // if (name && email) return `${name}. ${email}`;
+                  if (name) return name;
+                  if (email) return email;
+                  if ((user as AdminUser).invitedAt) return `Invited on ${(user as AdminUser).invitedAt ? new Date((user as AdminUser).invitedAt!).toLocaleDateString('en-NG') : ''}`;
+                  return "—";
+                })()}
+              />
+            ) : null}
 
             {user.role === "host" && (user as HostUser).bankDetails ? (
               <>
@@ -113,7 +147,7 @@ export function UserDetailsSheet({
               </>
             ) : null}
 
-            {user.role === "admin" || user.role === "super_admin" ? (
+            {/* {user.role === "admin" || user.role === "super_admin" ? (
               <>
                 <div className="mt-4 mb-1 pt-2 border-t border-border/60">
                   <h4 className="text-[12px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -137,34 +171,36 @@ export function UserDetailsSheet({
                   )}
                 </div>
               </>
-            ) : null}
+            ) : null} */}
 
-            {/* Activity cards */}
-            <div className="mt-5 mb-2 pt-4">
-              <h4 className="font-semibold tracking-wide mb-3">
-                Activity
-              </h4>
-              <div className="grid grid-cols-2 gap-3">
-                <Card className="rounded-lg border-border/60 bg-card shadow-sm">
-                  <CardContent className="p-4 flex flex-col gap-1">
-                    <CalendarFold size={16} />
-                    <span className="text-[11px] text-muted-foreground font-medium mt-1">
-                      Bookings
-                    </span>
-                    <span className="font-bold tracking-tight">{bookings}</span>
-                  </CardContent>
-                </Card>
-                <Card className="rounded-2xl border-border/60 bg-card shadow-sm">
-                  <CardContent className="p-4 flex flex-col gap-1">
-                    <List size={16}/>
-                    <span className="text-[11px] text-muted-foreground font-medium mt-1">
-                      Listings
-                    </span>
-                    <span className="font-bold tracking-tight">{listings}</span>
-                  </CardContent>
-                </Card>
+            {/* Activity cards — only meaningful for HOST (listings) + GUEST (bookings) roles. Hide for admin/super staff. */}
+            {(user.role === "host" || user.role === "guest") ? (
+              <div className="mt-5 mb-2 pt-4">
+                <h4 className="font-semibold tracking-wide mb-3">
+                  Activity
+                </h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <Card className="rounded-lg border-border/60 bg-card shadow-sm">
+                    <CardContent className="p-4 flex flex-col gap-1">
+                      <CalendarFold size={16} />
+                      <span className="text-[11px] text-muted-foreground font-medium mt-1">
+                        Bookings
+                      </span>
+                      <span className="font-bold tracking-tight">{bookings}</span>
+                    </CardContent>
+                  </Card>
+                  <Card className="rounded-lg border-border/60 bg-card shadow-sm">
+                    <CardContent className="p-4 flex flex-col gap-1">
+                      <List size={16}/>
+                      <span className="text-[11px] text-muted-foreground font-medium mt-1">
+                        Listings
+                      </span>
+                      <span className="font-bold tracking-tight">{listings}</span>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
-            </div>
+            ) : null}
           </div>
 
           {/* Bottom action */}

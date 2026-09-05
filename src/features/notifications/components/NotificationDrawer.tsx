@@ -82,10 +82,10 @@ function NotificationRow({
 }) {
   const handleClick = () => {
     if (!notification.isRead) onMarkAsRead(notification.id);
-    if (notification.targetPath) {
+    if (notification.targetPath) {console.log("notification:", notification)
       // Deep link handled by caller via toast visual feedback now.
       // When router is wired later use: router.push(notification.targetPath)
-      toast.message(`Opening ${notification.title}`);
+      toast.message(`Read ${notification.title}`);
     }
   };
 

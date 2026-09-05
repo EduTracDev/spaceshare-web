@@ -27,10 +27,14 @@ export interface BaseUser extends Timestamped {
 export type HostUser = BaseUser & { role: "host"; totalListings: number; bankDetails?: BankDetails };
 export type GuestUser = BaseUser & { role: "guest"; totalBookings: number };
 export type AdminUser = BaseUser & {
+  __kind?: "user";
   role: "admin" | "super_admin";
   permissions: string[];
   invitedAt?: string;
   invitedBy?: Id;
+  // Display info: Name + Email of Super Admin who invited them (backed by invitedByUser relation)
+  invitedByName?: string | null;
+  invitedByEmail?: string | null;
 };
 
 export type AnyUser = BaseUser;
